@@ -1,0 +1,70 @@
+.\" $Id: lat_syscall.8 1.2 00/10/16 17:13:48+02:00 staelin@hpli8.hpli.hpl.hp.com $
+.TH LAT_SYSCALL 8 "$Date: 00/10/16 17:13:48+02:00 $" "(c)1994 Larry McVoy" "LMBENCH"
+.SH NAME
+lat_syscall - time simple entry into the operating system
+.SH SYNOPSIS
+.B lat_syscall
+[
+.I "-P <parallelism>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.I "null|read|write|stat|fstat|open"
+[
+.I file
+]
+.SH DESCRIPTION
+.TP
+null
+measures how long it takes to do 
+.IR getppid ().
+We chose
+.IR getppid ()
+because in all UNIX variants we are aware of, it requires a round-trip
+to/from kernel space and the actual work required inside the kernel is
+small and bounded.
+.TP
+read
+measures how long it takes to read one byte from \f(CB/dev/zero\fP.  
+Note that some operating systems do not support \f(CB/dev/zero\fP.  
+.TP
+write
+times how long it takes to write one byte to \f(CB/dev/null\fP.  This
+is useful as a lower bound cost on anything that has to interact with
+the operating system.
+.TP
+stat
+measures how long it takes to 
+.IR stat ()
+a file whose inode is already cached.
+.TP
+fstat
+measures how long it takes to 
+.IR fstat ()
+an open file whose inode is already cached.
+.TP
+open
+measures how long it takes to 
+.IR open ()
+and then
+.IR close()
+a file.
+.SH OUTPUT
+Output format is 
+.sp
+.ft CB
+Null syscall: 67 microseconds
+.ft
+.SH ACKNOWLEDGEMENT
+Funding for the development of
+this tool was provided by Sun Microsystems Computer Corporation.
+.SH "SEE ALSO"
+lmbench(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.

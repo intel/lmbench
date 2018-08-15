@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# %W% %@%
+
+F="no_such_file"
+if [ -f version.h ]
+then	F=version.h
+else	if [ -f ../src/version.h ]
+	then	F=../src/version.h
+	else	if [ -f src/version.h ]
+		then	F=src/version.h
+		fi
+	fi
+fi
+if [ -f $F ]
+then	VERS=`egrep 'MAJOR|MINOR' $F | awk '{print $3}'` 
+	set `echo $VERS`
+	if [ $2 -lt 0 ] 
+	then	VERS=`echo $1$2 | sed s/-/alpha/`
+	else	VERS=`echo $VERS |sed 's/ /./'`
+	fi
+	VERS=lmbench-$VERS
+else	VERS=lmench-2-something
+fi
+echo $VERS

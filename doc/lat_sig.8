@@ -1,0 +1,33 @@
+.\" $Id$
+.TH LAT_SIG 8 "$Date$" "(c)1994-2000 Carl Staelin and Larry McVoy" "LMBENCH"
+.SH NAME
+lat_sig \- select benchmark
+.SH SYNOPSIS
+.B lat_ctx 
+[
+.I "-P <parallelism>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.I "install|catch|prot"
+[
+.I "file"
+]
+.SH DESCRIPTION
+.B lat_sig
+measures the time to install and catch signals.  It can also measure
+the time to catch a protection fault.
+.SH ACKNOWLEDGEMENT
+Funding for the development of
+this tool was provided by Sun Microsystems Computer Corporation.
+.SH "SEE ALSO"
+lmbench(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.
+

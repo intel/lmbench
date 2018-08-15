@@ -1,0 +1,88 @@
+.\"
+.\" @(#)results.man	2.0 98/04/24
+.\"
+.\"   results - lmbench results subsystem
+.\"
+.\"   Copyright (C) 1998  Carl Staelin and Larry McVoy
+.\"   E-mail: staelin@hpl.hp.com
+.\"
+.TH "lmbench result management" 3 "$Date:$" "(c)1998 Larry McVoy" "LMBENCH"
+.SH "NAME"
+insertinit, insertsort, get_results, set_results, save_median, save_minimum
+	\- the lmbench results subsystem
+.SH "SYNOPSIS"
+.B "#include ``lmbench.h''"
+.LP
+.B "#define TRIES 11"
+.LP
+.B "typedef struct { uint64 u, n } value_t;"
+.LP
+.B "typedef struct { int N; value_t v[TRIES]; } result_t;"
+.LP
+.B "int		sizeof_result(int N)"
+.LP
+.B "void	insertinit(result_t *r)"
+.LP
+.B "void	insertsort(uint64 u, uint64 n, result_t *r)"
+.LP
+.B "result_t*	get_results()"
+.LP
+.B "void	set_results(result_t *r)"
+.LP
+.B "void	save_median()"
+.LP
+.B "void	save_minimum()"
+.SH "DESCRIPTION"
+These routines provide some simple data management functionality.
+In most cases, you will not need these routines.
+.LP
+The current timing results can be accessed using the routines in
+timing(3).  The current timing results may be modified using 
+.B save_median 
+and 
+.BR save_minimum .  
+.TP
+.B "int		sizeof_result(int N)"
+returns the number of bytes to allocate for a result_t which contains
+.I N
+results.
+.TP
+.B "void	insertinit(result_t *r)"
+initializes the results array.
+.TP
+.B "void	insertsort(uint64 u, uint64 n, result_t *r)"
+insert 
+.I u 
+and 
+.I n 
+into 
+.IR r .  
+Results are sorted in decreasing order by 
+.IR u/n .
+.TP
+.B "void	get_results(result_t *r)"
+get a copy of the current results.
+.TP
+.B "void	set_results(result_t *r)"
+save a copy 
+.I r 
+as the current results.
+.TP
+.B "void	save_median()"
+sets the timing results to the median of the current results.
+.TP
+.B "void	save_minimum()"
+sets the timing restuls to the minimum of the current results.
+.LP
+Results are sorted in ascending order, so the minimum value is at 
+.B TRIES-1
+and the maximum value is at
+.BR 0 .
+.SH "FUTURES"
+Development of \fIlmbench\fR is continuing.  
+.SH "SEE ALSO"
+lmbench(8), lmbench(3), reporting(3), results(3)
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.

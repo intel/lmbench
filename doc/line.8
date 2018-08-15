@@ -1,0 +1,50 @@
+.\" $Id$
+.TH LINE 8 "$Date$" "(c)2000 Carl Staelin and Larry McVoy" "LMBENCH"
+.SH NAME
+line \- cache line size
+.SH SYNOPSIS
+.B tlb
+[
+.I "-M <len>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.SH DESCRIPTION
+.B line
+tries to determine the cache line size in bytes of the largest cache
+which is smaller than
+.I len
+bytes.
+.LP
+.B line
+creates pointer chains which access the first word on each cache line
+on a page (randomly meandering through all the lines in a page before
+jumping to the next page).  It measures the average memory latency
+for a variety of line sizes, starting with a line size of one word.
+When it finds an increase in the average latency that is significantly
+larger than the latency for the smaller line size then it assumes that
+it has found the line size.
+.LP
+This algorithm works because for line sizes less than the true line
+size, at least two 
+.B line
+cache lines fit in the space of a true cache line.  Since that cache
+line will be accessed twice, the first access will cause an expensive
+cache miss, while the second access will be a cache hit.  Once the 
+.B line
+cache line is equal to the true cache line size, then all accesses
+will cause cache misses.
+.SH BUGS
+.B line
+is an experimental benchmark, but it seems to work well on most
+systems.  
+.SH "SEE ALSO"
+lmbench(8), tlb(8), cache(8), par_mem(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.

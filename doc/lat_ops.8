@@ -1,0 +1,37 @@
+.\" $Id$
+.TH LAT_OPS 8 "$Date$" "(c)2000 Carl Staelin and Larry McVoy" "LMBENCH"
+.SH NAME
+lat_ops \- basic CPU operation parallelism
+.SH SYNOPSIS
+.B lat_ops
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.SH DESCRIPTION
+.B lat_ops
+measures the latency of basic CPU operations, such as
+integer ADD.  
+.TP
+integer bit, add, mul, div, mod operations
+maximum parallelism for integer XOR, ADD, MUL, DIV, MOD operations.
+.TP
+uint64 bit, add, mul, div, mod operations
+maximum parallelism for uint64 XOR, ADD, MUL, DIV, MOD operations.
+.TP
+float add, mul, div operations
+maximum parallelism for flot ADD, MUL, DIV operations.
+.TP
+double add, mul, div operations
+maximum parallelism for flot ADD, MUL, DIV operations.
+.SH BUGS
+This benchmark is highly experimental and may sometimes (frequently?)
+give erroneous results.
+.SH "SEE ALSO"
+lmbench(8), par_ops(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.

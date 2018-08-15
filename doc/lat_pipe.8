@@ -1,0 +1,38 @@
+.\" $Id: lat_pipe.8 1.2 00/10/16 17:13:45+02:00 staelin@hpli8.hpli.hpl.hp.com $
+.TH LAT_PIPE 8 "$Date: 00/10/16 17:13:45+02:00 $" "(c)1994 Larry McVoy" "LMBENCH"
+.SH NAME
+lat_pipe \- measure interprocess communication latency through pipes
+.SH SYNOPSIS
+.B lat_pipe
+[
+.I "-P <parallelism>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.SH DESCRIPTION
+.B lat_pipe
+uses two processes communicating through a Unix pipe to measure interprocess
+communication latencies.  The benchmark passes a token back and forth between
+the two processes (this sort of benchmark is frequently referred to as a
+``hot potato'' benchmark).  No other work is done in the processes.
+.SH OUTPUT
+The reported time is in microseconds per round trip and includes the total
+time, i.e., the context switching overhead is includeded.
+Output format is like so
+.sp
+.ft CB
+Pipe latency: 491 microseconds
+.ft
+.SH ACKNOWLEDGEMENT
+Funding for the development of
+this tool was provided by Sun Microsystems Computer Corporation.
+.SH "SEE ALSO"
+lmbench(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.

@@ -1,0 +1,32 @@
+.\" $Id$
+.TH LAT_FCNTL 8 "$Date$" "(c)1994-2000 Carl Staelin and Larry McVoy" "LMBENCH"
+.SH NAME
+lat_fcntl \- fcntl file locking benchmark
+.SH SYNOPSIS
+.B lat_ctx 
+[
+.I "-P <parallelism>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.SH DESCRIPTION
+.B lat_fcntl
+is a client/server program that measures file locking latencies.  The
+benchmark alternately locks and unlocks files so that only one of the
+client or server is running at a time, similar to ``hot potato''
+message passing benchmarks. 
+No other work is done in the processes.
+.SH ACKNOWLEDGEMENT
+Funding for the development of
+this tool was provided by Sun Microsystems Computer Corporation.
+.SH "SEE ALSO"
+lmbench(8), lat_fifo(8), lat_tcp(8), lat_udp(8), lat_unix(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.
+

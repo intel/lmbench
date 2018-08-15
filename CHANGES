@@ -1,0 +1,82 @@
+lmbench3-alpha1
+	Added new benchmark line, which determines the cache line size
+
+	Added new benchmark tlb, which determines the effective TLB size.
+	Note that this may differ from the hardware TLB size due to OS
+	TLB entries and super-pages.
+
+	Added new benchmark par_mem, which determines the possible
+	speedup due to multiple memory reads progressing in parallel.
+	This number usually depends highly on the portion of the
+	memory hierarchy being probed, with higher caches generally
+	having greater parallelism.
+
+	Added new benchmark cache, which determines the number of caches,
+	their sizes, latency, and available parallelism.  It also 
+	reports the latency and available parallelism for main memory.
+
+	Added new benchmark lat_ops, which attempts to determine the
+	latency of basic operations, such as add, multiply and divide,
+	for a variety of data types, such as int, int64, float and
+	double.
+
+	Added new benchmark par_ops, which attempts to determine the
+	available scaling of the various basic operations for various
+	data types.
+
+	Added new benchmark stream, which reports memory bandwidth
+	numbers using benchmark kernels from John McCalpin's STREAM
+	and STREAM version 2 benchmarks.
+
+	Added new benchmark lat_sem, which reports SysV semaphore latency.
+
+	Added getopt() command line parsing to most benchmarks.
+
+	Added a new benchmark timing harness, benchmp(), which makes
+	it relatively easy to design and build benchmarks which
+	measure system performance under a fixed load.  It takes
+	a few parameters:
+		- initialize: a function pointer.  If this is non-NULL
+		  the function is called in the child processes after
+		  the fork but before any benchmark-related work is 
+		  done.  The function is passed a cookie from the
+		  benchmp() call.  This can be a pointer to a
+		  data structure which lets the function know what
+		  it needs to do.
+		- benchmark: a function pointer.  This function
+		  takes two parameters, an iteration count "iters", 
+		  and a cookie.  The benchmarked activity must be
+		  run "iters" times (or some integer multiple of
+		  "iters".  This function must be idempotent; ie.,
+		  the benchmark harness must be able to call it
+		  as many times as necessary.
+		- cleanup: a function pointer.  If this is non-NULL
+		  the function is called after all benchmarking is
+		  completed to cleanup any resources that may have
+		  been allocated.
+		- enough: If this is non-zero then it is the minimum
+		  amount of time, in micro-seconds, that the benchmark
+		  must be run to provide reliable results.  In most
+		  cases this is left to zero to allow the harness to
+		  autoscale the timing intervals to the system clock's
+		  resolution/accuracy.
+		- parallel: this is the number of child processes
+		  running the benchmark that should be run in parallel.
+		  This is really the load factor.
+		- warmup: a time period in micro-seconds that each
+		  child process must run the benchmarked process
+		  before any timing intervals can begin.  This is
+		  to allow the system scheduler time to settle in
+		  a parallel/distributed system before we begin
+		  measurements.  (If so desired)
+		- repetitions: If non-zero this is the number of
+		  times we need to repeat each measurement.  The
+		  default is 11.
+		- cookie: An opaque value which can be used to
+		  pass information to the initialize(), benchmark(),
+		  and cleanup() routines.
+	This new harness is now used by: bw_file_rd, bw_mem, bw_mmap_rd,
+	bw_pipe, bw_tcp, bw_unix, lat_connect, lat_ctx, lat_fcntl,
+	lat_fifo, lat_mem_rd, lat_mmap, lat_ops, lat_pagefault, lat_pipe,
+	lat_proc, lat_rpc, lat_select, lat_sem, lat_sig, lat_syscall,
+	lat_tcp, lat_udp, lat_unix, lat_unix_connect, and stream.

@@ -1,0 +1,32 @@
+.\" $Id$
+.TH LAT_FIFO 8 "$Date$" "(c)1994-2000 Carl Staelin and Larry McVoy" "LMBENCH"
+.SH NAME
+lat_fifo \- FIFO benchmark
+.SH SYNOPSIS
+.B lat_ctx 
+[
+.I "-P <parallelism>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.SH DESCRIPTION
+.B lat_fifo
+is a client/server program that measures interprocess
+communication latencies.  The benchmark passes a message back and forth between
+the two processes (this sort of benchmark is frequently referred to as a
+``hot potato'' benchmark).  No other work is done in the processes.
+The message is passed back and forth using FIFOs.
+.SH ACKNOWLEDGEMENT
+Funding for the development of
+this tool was provided by Sun Microsystems Computer Corporation.
+.SH "SEE ALSO"
+lmbench(8), lat_fcntl(8), lat_tcp(8), lat_udp(8), lat_unix(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.
+

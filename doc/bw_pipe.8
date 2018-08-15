@@ -1,0 +1,59 @@
+.\" $Id: bw_pipe.8 1.2 00/10/16 17:13:38+02:00 staelin@hpli8.hpli.hpl.hp.com $
+.TH BW_PIPE 8 "$Date: 00/10/16 17:13:38+02:00 $" "(c)1994 Larry McVoy" "LMBENCH"
+.SH NAME
+bw_pipe \- time data movement through pipes
+.SH SYNOPSIS
+.B bw_pipe
+[
+.I "-m <message size>"
+]
+[
+.I "-M <total bytes>"
+]
+[
+.I "-P <parallelism>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.SH DESCRIPTION
+.B bw_pipe
+creates a Unix pipe between two processes and moves 
+.I "total bytes"
+through the pipe in 
+.I "message size"
+chunks (note that pipes are typically sized smaller than that).  
+The default
+.I "total bytes"
+is 10MB and the default
+.I "message size"
+is 64KB.
+.SH OUTPUT
+Output format is \f(CB"Pipe bandwidth: %0.2f MB/sec\\n", megabytes_per_second\fP, i.e.,
+.sp
+.ft CB
+Pipe bandwidth: 4.87 MB/sec
+.ft
+.SH MEMORY UTILIZATION
+This benchmark can move up to six times the requested memory per process.
+There are two processes, the sender and the receiver.
+Most Unix
+systems implement the read/write system calls as a bcopy from/to kernel space
+to/from user space.  Bcopy will use 2-3 times as much memory bandwidth:
+there is one read from the source and a write to the destionation.  The
+write usually results in a cache line read and then a write back of
+the cache line at some later point.  Memory utilization might be reduced
+by 1/3 if the processor architecture implemented "load cache line"
+and "store cache line" instructions (as well as getcachelinesize).
+.SH ACKNOWLEDGEMENT
+Funding for the development of
+this tool was provided by Sun Microsystems Computer Corporation.
+.SH "SEE ALSO"
+lmbench(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.

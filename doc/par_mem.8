@@ -1,0 +1,68 @@
+.\" $Id$
+.TH PAR_MEM 8 "$Date$" "(c)2000 Carl Staelin and Larry McVoy" "LMBENCH"
+.SH NAME
+par_mem \- memory parallelism benchmark
+.SH SYNOPSIS
+.B par_mem
+[
+.I "-L <line size>"
+]
+[
+.I "-M <len>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.SH DESCRIPTION
+.B par_mem
+measures the available parallelism in the memory hierarchy, up to
+.I len
+bytes.  Modern processors can often service multiple memory requests
+in parallel, while older processors typically blocked on LOAD
+instructions and had no available parallelism (other than that
+provided by cache prefetching).  
+.B par_mem
+measures the available parallelism at a variety of points, since the
+available parallelism is often a function of the data location in the
+memory hierarchy.
+.LP
+In order to measure the available parallelism
+.B par_mem
+conducts a variety of experiments at each memory size; one for each
+level of parallelism.  It builds a pointer chain of the desired
+length.  It then creates an array of pointers which point to chain
+entries which are evenly spaced across the chain.  Then it starts
+running the pointers forward through the chain in parallel.  It can
+then measure the average memory latency for each level of parallelism,
+and the available parallelism is the minimum average memory latency
+for parallelism 1 divided by the average memory latency across all
+levels of available parallelism.
+.LP
+For example, the inner loop which measures parallelism 2 would look
+something like:
+.sp
+.ft CB
+	p0 = (char **)*p0;
+	p1 = (char **)*p1;
+.ft
+.sp
+in a 
+.I for 
+loop (the over head of the 
+.I for 
+loop is not significant; the loop is an unrolled loop 100 loads long).  
+.SH OUTPUT
+Output format is intended as input to \fBxgraph\fP or some similar program
+(we use a perl script that produces pic input).
+There is a set of data produced for each stride.  The data set title
+is the stride size and the data points are the array size in megabytes 
+(floating point value) and the load latency over all points in that array.
+.SH "SEE ALSO"
+lmbench(8), line(8), cache(8), tlb(8), par_ops(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.

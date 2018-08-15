@@ -1,0 +1,33 @@
+.\" $Id$
+.TH LAT_SELECT 8 "$Date$" "(c)1994-2000 Carl Staelin and Larry McVoy" "LMBENCH"
+.SH NAME
+lat_select \- select benchmark
+.SH SYNOPSIS
+.B lat_ctx 
+[
+.I "-P <parallelism>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+[
+.I "n"
+]
+.SH DESCRIPTION
+.B lat_select
+measures the time to do a select on 
+.I n
+file descriptors.
+.SH ACKNOWLEDGEMENT
+Funding for the development of
+this tool was provided by Sun Microsystems Computer Corporation.
+.SH "SEE ALSO"
+lmbench(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.
+

@@ -1,0 +1,41 @@
+.\" $Id$
+.TH LAT_FCNTL 8 "$Date$" "(c)1994-2000 Carl Staelin and Larry McVoy" "LMBENCH"
+.SH NAME
+lat_fcntl \- fcntl file locking benchmark
+.SH SYNOPSIS
+.B lat_ctx 
+[
+.I "-d"
+]
+[
+.I "-e"
+]
+[
+.I "-S"
+]
+.I serverhost
+[
+.I port
+]
+.SH DESCRIPTION
+.B lat_http
+is a client/server program that measures simple http transaction
+latencies.  It has its own HTTP server, and it is meant to simply
+measure the minimum overall costs of simple HTTP ``GET''
+transactions.  It does not measure the performance of third-party HTTP
+servers.  
+.LP
+The client simply makes a series of HTTP GET requests for files.  The
+files are a fixed set of files included with the benchmark.  No
+special care was made to ensure that the file sizes match and
+predetermined distribution.
+.SH ACKNOWLEDGEMENT
+Funding for the development of
+this tool was provided by Sun Microsystems Computer Corporation.
+.SH "SEE ALSO"
+lmbench(8), lat_connect(8), lat_tcp(8), lat_sig(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.
+

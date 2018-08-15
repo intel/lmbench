@@ -1,0 +1,43 @@
+.\" $Id$
+.TH LAT_UNIX_CONNECT 8 "$Date$" "(c)1994 Larry McVoy" "LMBENCH"
+.SH NAME
+lat_unix_connect \- measure interprocess connection latency via UNIX sockets
+.SH SYNOPSIS
+.B lat_unix_connect
+.I -s
+.sp .5
+.B lat_unix_connect
+[
+.I "-P <parallelism>"
+]
+[
+.I "-W <warmups>"
+]
+[
+.I "-N <repetitions>"
+]
+.sp .5
+.B lat_unix_connect
+.I "-S"
+.SH DESCRIPTION
+.B lat_unix_connect
+is a client/server program that measures interprocess
+connection latencies.   The benchmark times the creation and connection of
+an AF_UNIX socket to a local server.  
+.LP
+.B lat_connect
+has three forms of usage: as a server (-s), as a client (lat_connect),
+and as a shutdown (lat_connect -S).
+.SH OUTPUT
+The reported time is in microseconds per connection.
+Output format is like so
+.sp
+.ft CB
+UNIX connection cost: 1006 microseconds
+.ft
+.SH "SEE ALSO"
+lmbench(8).
+.SH "AUTHOR"
+Carl Staelin and Larry McVoy
+.PP
+Comments, suggestions, and bug reports are always welcome.

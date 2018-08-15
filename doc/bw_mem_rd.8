@@ -1,0 +1,29 @@
+.\" $Id: bw_mem_rd.8 1.1 94/11/18 01:26:35-08:00 lm@lm.bitmover.com $
+.TH BW_MEM_RD 8 "$Date: 94/11/18 01:26:35-08:00 $" "(c)1994 Larry McVoy" "LMBENCH"
+.SH NAME
+bw_mem_rd \- time memory read rate (with overhead)
+.SH SYNOPSIS
+.B bw_mem_rd
+.I size
+.SH DESCRIPTION
+.B bw_mem_rd
+allocates the specified amount of memory, zeros it, and then times the
+reading of that memory as a series of integer loads and adds.  Each
+four byte integer is loaded and added to accumulator.
+.LP
+The size
+specification may end with ``k'' or ``m'' to mean
+kilobytes (* 1024) or megabytes (* 1024 * 1024).
+.SH OUTPUT
+Output format is \f(CB"%0.2f %.2f\\n", megabytes, megabytes_per_second\fP, i.e.,
+.sp
+.ft CB
+8.00 25.33
+.ft
+.SH MEMORY UTILIZATION
+This benchmark should move approximately the reported amount of memory.
+.SH ACKNOWLEDGEMENT
+Funding for the development of
+this tool was provided by Sun Microsystems Computer Corporation.
+.SH "SEE ALSO"
+lmbench(8).

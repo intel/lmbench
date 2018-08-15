@@ -1,0 +1,78 @@
+LMbench was originally developed by Larry McVoy while he worked
+at Sun Microsystems.  Larry continued development while working
+at Silicon Graphics, and was joined by Carl Staelin, who works
+for Hewlett-Packard Laboratories.
+
+LMbench would not be the successful cross-platform benchmark
+that it is today without the efforts and assistance of a wide
+range of people.  From volunteers who run it on various hardware
+and report bugs, to managers who provide financial and other
+support, to peers and colleagues who request features or
+provide feedback on design elements.  All such help has been
+critical to making LMbench a success.
+
+Below is a partial list of all those people who helped support
+the development of LMbench in one form or other, such as
+benchmark suggestions, bug reports, and so forth.  All omissions
+are accidental, and if your name was not included, please accept
+our humble apologies.  
+
+The people who have helped LMbench include, in alphabetic
+order: 
+
+Ralf Baechle,
+Christian Bau,
+Nelson H. F. Beebe,
+Anton Blanchard,
+Joel Berman,
+Paul Borrill,
+Ed Bradford,
+Len Brown,
+Robert G. Brown,
+Bruce Chapman,
+Mark Culotta,
+Fred Douglis,
+Lars-Eke Eriksson,
+Josh Fisher,
+Marc Fleischmann,
+John Fort,
+Andy Glew,
+Achim Gratz,
+Richard Henderson,
+Lev Iserovich,
+Michael A. Julier,
+Frans Kaashoek,
+Brad Knowles,
+Richard Littin,
+Bil Long,
+Udi Manber,
+John Mashey, 
+David Miller,
+Dejan Milojicic,
+Ingo Molnar,
+David Mosberger, 
+Satya Nishtala, 
+Kevin Normoyle,
+Neal Nuckolls, 
+Steve Piatz,
+Tim Prince,
+James Riden,
+Sam Roberts,
+Philip Roth,
+Chris Ruemmler,
+Olli Savia, 
+Scott Schwartz,
+Wayne Scott,
+Stephan Somogyi, 
+Ratnakar Tiwari,
+Linus Torvalds,
+Dan Truong,
+Dirk Twiehaus,
+Duc Vianney, 
+Ramya Vijay,
+Hai Vo-Ba,
+David T. Wang,
+Brian Whitney,
+David Wilson,
+Mitch Wright.
+
