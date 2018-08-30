@@ -152,6 +152,12 @@ base_initialize(iter_t iterations, void* cookie)
 	pages = permutation(nmpages, state->pagesize);
 	p = state->addr = (char*)malloc(state->maxlen + 2 * state->pagesize);
 
+	if (p == NULL) {
+            printf(" memory allocation failure, current memory size used for\
+testing is %llu bytes, please choose smaller memory size for testing\n ", state->maxlen);
+            return;
+	}
+
 	state->nwords = nwords;
 	state->nlines = nlines;
 	state->npages = npages;
