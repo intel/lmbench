@@ -128,7 +128,7 @@ tlb_cleanup(iter_t iterations, void* cookie)
 void
 base_initialize(iter_t iterations, void* cookie)
 {
-	int	nwords, nlines, nbytes, npages, nmpages;
+	size_t	nwords, nlines, nbytes, npages, nmpages;
 	size_t *pages;
 	size_t *lines;
 	size_t *words;
