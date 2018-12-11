@@ -638,7 +638,7 @@ EOF
 echo $ECHON "Status output file [default /dev/tty] $ECHOC"
 read OUTPUT
 if [ "X$OUTPUT" = X ]
-then	OUTPUT=/dev/tty;
+then	OUTPUT=/dev/null;
 fi
 
 ############################################################################
