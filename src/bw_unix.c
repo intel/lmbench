@@ -159,14 +159,14 @@ main(int argc, char *argv[])
 			repetitions = atoi(optarg);
 			break;
 		default:
-			lmbench_usage(argc, argv);
+			lmbench_usage(argc, argv, usage);
 			break;
 		}
 	}
 	if (optind == argc - 1) {
 		state.bytes = bytes(argv[optind]);
 	} else if (optind < argc - 1) {
-		lmbench_usage(argc, argv);
+		lmbench_usage(argc, argv, usage);
 	}
 
 	state.pid = 0;
