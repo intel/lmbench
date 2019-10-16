@@ -9,7 +9,7 @@
 char	*id = "$Id: s.lat_syscall.c 1.11 97/06/15 22:38:58-07:00 lm $\n";
 
 #include "bench.h"
-#define	FNAME "/usr/include/sys/types.h"
+#define	FNAME "/usr/include/linux/types.h"
 
 struct _state {
 	int fd;
