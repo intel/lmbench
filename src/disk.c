@@ -288,14 +288,8 @@ disksize(char *disk)
 int
 seekto(int fd, uint64 off)
 {
-#ifdef	__linux__
-	extern	loff_t llseek(int, loff_t, int);
+	// In modern times, lseek() is 64-bit clean.
 
-	if (llseek(fd, (loff_t)off, SEEK_SET) == (loff_t)-1) {
-		return(-1);
-	}
-	return (0);
-#else
 	uint64	here = 0;
 
 	lseek(fd, 0, 0);
@@ -306,5 +300,4 @@ seekto(int fd, uint64 off)
 	assert((uint64)(off - here) <= (uint64)BIGSEEK);
 	if (lseek(fd, (int)(off - here), SEEK_CUR) == -1) return (-1);
 	return (0);
-#endif
 }
