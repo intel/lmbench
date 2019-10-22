@@ -401,7 +401,7 @@ benchmp_parent(	int response,
 	}
 
 	/* send 'start' signal */
-	write(start_signal, signals, parallel * sizeof(char));
+	(void) !write(start_signal, signals, parallel * sizeof(char));
 
 	/* Collect 'done' signals */
 	for (i = 0; i < parallel * sizeof(char); i += bytes_read) {
@@ -446,7 +446,7 @@ benchmp_parent(	int response,
 		FD_ZERO(&fds_error);
 
 		/* tell one child to report its results */
-		write(result_signal, buf, sizeof(char));
+		(void) !write(result_signal, buf, sizeof(char));
 
 		for (; n > 0; n -= bytes_read, buf += bytes_read) {
 			bytes_read = 0;
@@ -487,7 +487,7 @@ benchmp_parent(	int response,
 	signal(SIGCHLD, SIG_DFL);
 	
 	/* send 'exit' signals */
-	write(exit_signal, results, parallel * sizeof(char));
+	(void) !write(exit_signal, results, parallel * sizeof(char));
 
 	/* Compute median time; iterations is constant! */
 	set_results(merged_results);
@@ -700,13 +700,13 @@ benchmp_interval(void* _state)
 		       NULL, &timeout);
 		if (FD_ISSET(state->start_signal, &fds)) {
 			state->state = timing_interval;
-			read(state->start_signal, &c, sizeof(char));
+			(void) !read(state->start_signal, &c, sizeof(char));
 			iterations = state->iterations;
 		}
 		if (state->need_warmup) {
 			state->need_warmup = 0;
 			/* send 'ready' */
-			write(state->response, &c, sizeof(char));
+			(void) !write(state->response, &c, sizeof(char));
 		}
 		break;
 	case timing_interval:
@@ -736,7 +736,7 @@ benchmp_interval(void* _state)
 		state->iterations = iterations;
 		if (state->state == cooldown) {
 			/* send 'done' */
-			write(state->response, (void*)&c, sizeof(char));
+			(void) !write(state->response, (void*)&c, sizeof(char));
 			iterations = state->iterations_batch;
 		}
 		break;
@@ -751,8 +751,8 @@ benchmp_interval(void* _state)
 			 * the parent to tell us to send our results back.
 			 * From this point on, we will do no more "work".
 			 */
-			read(state->result_signal, (void*)&c, sizeof(char));
-			write(state->response, (void*)get_results(), state->r_size);
+			(void) !read(state->result_signal, (void*)&c, sizeof(char));
+			(void) !write(state->response, (void*)get_results(), state->r_size);
 			if (state->cleanup) {
 				if (benchmp_sigchld_handler == SIG_DFL)
 					signal(SIGCHLD, SIG_DFL);
@@ -760,7 +760,7 @@ benchmp_interval(void* _state)
 			}
 
 			/* Now wait for signal to exit */
-			read(state->exit_signal, (void*)&c, sizeof(char));
+			(void) !read(state->exit_signal, (void*)&c, sizeof(char));
 			exit(0);
 		}
 	};
