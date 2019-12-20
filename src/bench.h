@@ -35,19 +35,9 @@ typedef unsigned char bool_t;
 #include        <sys/un.h>
 #include        <sys/resource.h>
 #define PORTMAP
-#ifndef __linux__
 #include	<rpc/rpc.h>
-#else
-#include	<tirpc/rpc/rpc.h>
 #endif
-
-#endif
-
-#ifndef __linux__
 #include	<rpc/types.h>
-#else
-#include	<tirpc/rpc/types.h>
-#endif
 
 #include 	<stdarg.h>
 #ifndef HAVE_uint
@@ -269,8 +259,6 @@ extern	int	opterr;
 extern	int	optopt;
 extern	char	*optarg;
 int	getopt(int ac, char **av, char *opts);
-
-void lmbench_usage(int argc, char *argv[], char* usage);
 
 typedef u_long iter_t;
 typedef void (*benchmp_f)(iter_t iterations, void* cookie);
