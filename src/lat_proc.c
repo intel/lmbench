@@ -111,7 +111,7 @@ do_shell(iter_t iterations, void* cookie)
 		case 0:	/* child */
 			handle_scheduler(benchmp_childid(), 1, 1);
 			close(1);
-			execlp("/bin/sh", "sh", "-c", PROG, 0);
+			execlp("/bin/sh", "sh", "-c", PROG, (char *)0);
 			exit(1);
 
 		default:

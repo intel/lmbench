@@ -47,7 +47,7 @@ int main(int ac, char **av)
 		}
 		if (!strcmp(av[1], "-S")) {
 			int sock = unix_connect(CONNAME);
-			write(sock, "0", 1);
+			(void) !write(sock, "0", 1);
 			close(sock);
 			exit(0);
 		}
@@ -92,7 +92,7 @@ void server_main(void)
 	for (;;) {
 		newsock = unix_accept(sock);
 		c = 0;
-		read(newsock, &c, 1);
+		(void) !read(newsock, &c, 1);
 		if (c && c == '0') {
 			unix_done(sock, CONNAME);
 			exit(0);

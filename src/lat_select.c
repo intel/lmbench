@@ -131,7 +131,7 @@ server(void* cookie)
 		/* child server process */
 		while (pid == getppid()) {
 			int newsock = tcp_accept(state->sock, SOCKOPT_NONE);
-			read(newsock, &state->fid, 1);
+			(void) !read(newsock, &state->fid, 1);
 			close(newsock);
 		}
 		exit(0);

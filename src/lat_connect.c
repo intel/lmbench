@@ -52,7 +52,7 @@ main(int ac, char **av)
 			int sock = tcp_connect(av[optind],
 					       TCP_CONNECT,
 					       SOCKOPT_NONE);
-			write(sock, "0", 1);
+			(void) !write(sock, "0", 1);
 			close(sock);
 			exit(0);
 		}

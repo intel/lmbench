@@ -60,7 +60,7 @@ main(int ac, char **av)
 		{
 			int	conn;
 			conn = tcp_connect(optarg, TCP_DATA, SOCKOPT_NONE);
-			write(conn, "0", 1);
+			(void) !write(conn, "0", 1);
 			exit(0);
 		}
 		case 'm':

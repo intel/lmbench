@@ -34,7 +34,7 @@
 # I finally know why Larry Wall's Makefile says "Grrrr".
 SHELL=/bin/sh
 
-CC=`../scripts/compiler`
+CC=x86_64-intelaxxia-linux-gcc
 MAKE=`../scripts/make`
 AR=ar
 ARCREATE=cr

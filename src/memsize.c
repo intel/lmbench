@@ -137,7 +137,7 @@ test_malloc(size_t size)
 		close(fid[0]);
 		p = malloc(size);
 		result = (p ? 1 : 0);
-		write(fid[1], &result, sizeof(int));
+		(void) !write(fid[1], &result, sizeof(int));
 		close(fid[1]);
 		if (p) free(p);
 		exit(0);
