@@ -327,7 +327,7 @@ foreach $file (@ARGV) {
 			    	last if /^\s*$/ || /^Memory/;
 			}
 		}
-		if (/size=16/) {
+		if (/size=16k/) {
 			while (<FD>) {
 				if (/^2 /) {
 					@_ = split; push(@lat_ctx16_2, $_[1]);
