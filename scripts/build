@@ -247,6 +247,7 @@ rm -f ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
 
 
 if [ ! -d ${BINDIR} ]; then mkdir -p ${BINDIR}; fi
-
+#LDLIBS="${LDLIBS} -ltirpc"
+#CFLAGS="${CFLAGS} -I/usr/include/tirpc"
 # now go ahead and build everything!
 ${MAKE} OS="${OS}" CC="${CC}" CFLAGS="${CFLAGS}" LDLIBS="${LDLIBS}" O="${BINDIR}" $*

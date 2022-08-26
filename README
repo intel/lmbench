@@ -21,3 +21,11 @@ It's a good idea to do several runs and compare the output like so
 	make rerun
 	make rerun
 	cd Results && make LIST=<your OS>/*
+
+If your os is euler or centos, please Uncomment line 250 and 251;
+
+If you want to run the benchmark in loongarch , you just need to say:
+
+	make results OS=mips64el
+
+
