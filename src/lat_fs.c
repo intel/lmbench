@@ -69,7 +69,7 @@ main(int ac, char **av)
 		lmbench_usage(ac, av, usage);
 	}
 	if (optind == ac - 1) {
-		state.tmpdir = av[1];
+		state.tmpdir = av[optind];
 	}
 
 	if (state.size) {
