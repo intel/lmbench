@@ -85,6 +85,16 @@ else
 fi
 rm -f ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
 
+# check for -ltirpc
+echo "extern int pmap_set(); main() { pmap_set(); }" > ${BASE}$$.c
+if ${CC} ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c 1>${NULL} 2>${NULL}; then
+	true;
+else
+	${CC} ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c -ltirpc 1>${NULL} 2>${NULL} \
+		&& LDLIBS="${LDLIBS} -ltirpc" && CFLAGS="${CFLAGS} -I/usr/include/tirpc"
+fi
+rm -f ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
+
 
 # check for -lsocket
 echo "extern void* getservent(); main() { getservent(); }" > ${BASE}$$.c

@@ -202,6 +202,7 @@ sched_pin(int cpu)
 	
 	if (cpumask == NULL) {
 		sz = 1 + (2 * sched_ncpus()) / (8 * sizeof(unsigned long));
+		if (sz<sizeof(cpu_set_t)/sizeof(unsigned long)) sz = sizeof(cpu_set_t)/sizeof(unsigned long);
 		mask = (unsigned long*)malloc(sz * sizeof(unsigned long));
 		cpumask = (unsigned long*)malloc(sz * sizeof(unsigned long));
 		retval = sched_getaffinity(0, sz * sizeof(unsigned long), cpumask);
