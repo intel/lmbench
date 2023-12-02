@@ -58,7 +58,10 @@ SAMPLES=lmbench/Results/aix/rs6000 lmbench/Results/hpux/snake \
 	lmbench/Results/irix/indigo2 lmbench/Results/linux/pentium \
 	lmbench/Results/osf1/alpha lmbench/Results/solaris/ss20* 
 
-COMPILE=$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
+RPCINCLUDE=-I/usr/include/tirpc
+
+
+COMPILE=$(CC) $(CFLAGS) $(RPCINCLUDE) $(CPPFLAGS) $(LDFLAGS)
 
 INCS =	bench.h lib_mem.h lib_tcp.h lib_udp.h stats.h timing.h
 
@@ -112,7 +115,7 @@ LIBOBJS= $O/lib_tcp.o $O/lib_udp.o $O/lib_unix.o $O/lib_timing.o 	\
 
 lmbench: $(UTILS)
 	@env CFLAGS=-O MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="$(CC)" OS="$(OS)" ../scripts/build all
-	-@env CFLAGS=-O MAKE="$(MAKE)" MAKEFLAGS="-k $(MAKEFLAGS)" CC="$(CC)" OS="$(OS)" ../scripts/build opt
+	-@env CFLAGS=-O MAKE="$(MAKE)" MAKEFLAGS="k$(MAKEFLAGS)" CC="$(CC)" OS="$(OS)" ../scripts/build opt
 
 results: lmbench
 	@env OS="${OS}" ../scripts/config-run
@@ -157,63 +160,43 @@ $(ASMS):
 	$(CC) -S $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ `basename $@ .s`.c
 
 Wall:
-	@env CFLAGS="-Wall -ansi" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build all opt
+	@env CFLAGS="-g -O -Wall" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build all opt
 
 debug:
-	@env CFLAGS="-g -O" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build all opt
+	@env CFLAGS="-g -O -DDEBUG" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build all opt
 
 assembler:
 	@env CFLAGS=-O MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build asm
 
-bk.ver: ../SCCS/s.ChangeSet
-	rm -f bk.ver
-	-echo `bk prs -hr+ -d'$$if(:SYMBOL:){:SYMBOL: }:UTC:' ../ChangeSet;` > bk.ver
-	touch bk.ver
 
-dist: bk.ver
-	@if [ "X`cd ..; bk sfiles -c`" != "X" ]; then \
-		echo "modified files!"; \
-		false; \
-	 fi
-	@if [ "X`cd ..; bk pending`" != "X" ]; then \
-		echo "pending changes!"; \
-		false; \
-	 fi
-	cd ..; \
-		SRCDIR=`pwd`; \
-		DIR=`basename $${SRCDIR}`; \
-		VERSION=`cat src/bk.ver| awk '{print $$1;}' | sed -e 's/Version-//g'`; \
-		cd ..; \
-		bk clone $${DIR} /tmp/lmbench-$${VERSION}; \
-		cd /tmp/lmbench-$${VERSION}; \
-		bk sfiles | xargs touch; \
-		sleep 5; \
-		bk get -s; \
-		for d in doc results scripts src; do \
-			cd $$d; bk get -s; cd ..; \
-		done; \
-		bk sfiles -U -g | xargs touch; \
-		cd src; \
-		make bk.ver; \
-		cd /tmp; \
-		tar czf $${SRCDIR}/../lmbench-$${VERSION}.tgz \
-			lmbench-$${VERSION}; \
-		rm -rf /tmp/lmbench-$${VERSION};
+tag:
+	ROOT=`cat ../CVS/Root`; \
+	MODULE=`cat ../CVS/Repository`; \
+	VERSION=`../scripts/version`; \
+	TAG=`echo lmbench_$${VERSION} | sed -e 's/-/_/g' -e 's/\\./_/g'`; \
+	cd .. \
+	&& cvs -d$${ROOT} tag -c "$${TAG}"
 
-get $(SRCS):
-	-get -s $(SRCS)
-
-edit get-e:
-	get -e -s $(SRCS)
+dist: 
+	SRCDIR=`pwd`; \
+	ROOT=`cat ../CVS/Root`; \
+	MODULE=`cat ../CVS/Repository`; \
+	VERSION=`../scripts/version`; \
+	cd /tmp \
+	&& cvs -d$${ROOT} export -Dtomorrow \
+		 -d $${MODULE}-$${VERSION} $${MODULE} \
+	&& chmod +x $${MODULE}-$${VERSION}/scripts/[a-z]* \
+	&& mv $${MODULE}-$${VERSION} lmbench-$${VERSION} \
+	&& tar czf $${SRCDIR}/../../lmbench-$${VERSION}.tgz \
+		lmbench-$${VERSION} \
+	&& rm -rf lmbench-$${VERSION};
 
 clean:
 	/bin/rm -f ../bin/*/CONFIG ../bin/*/*.[oas]
 	/bin/rm -f *.[oas]
-	-bk clean
 
 clobber:
 	/bin/rm -rf ../bin* SHAR
-	-bk clean
 
 shar:
 	cd ../.. && shar lmbench/Results/Makefile $(SAMPLES) lmbench/scripts/* lmbench/src/Makefile lmbench/src/*.[ch] > lmbench/SHAR
@@ -228,9 +211,10 @@ testmake: $(SRCS) $(UTILS) # used by scripts/make to test gmake
 	install install-target dist get edit get-e clean clobber \
 	share depend testmake
 
-$O/lmbench : ../scripts/lmbench bk.ver
+$O/lmbench : ../scripts/lmbench version.h
 	rm -f $O/lmbench
-	sed -e "s/<version>/`cat bk.ver`/g" < ../scripts/lmbench > $O/lmbench
+	VERSION=`../scripts/version`; \
+	sed -e "s/<version>/$${VERSION}/g" < ../scripts/lmbench > $O/lmbench
 	chmod +x $O/lmbench
 
 $O/lmbench.a: $(LIBOBJS)
@@ -284,11 +268,11 @@ $O/lat_ctx: lat_ctx.c timing.h stats.h bench.h $O/lmbench.a
 
 $O/lmhttp.s:lmhttp.c timing.h stats.h bench.h
 $O/lmhttp:  lmhttp.c timing.h stats.h bench.h $O/lmbench.a
-	$(COMPILE) -o $O/lmhttp lmhttp.c $O/lmbench.a $(LDLIBS)
+	$(COMPILE) -o $O/lmhttp lmhttp.c $O/lmbench.a $(LDLIBS) -ltirpc
 
 $O/lat_http.s:lat_http.c timing.h stats.h bench.h
 $O/lat_http:  lat_http.c timing.h stats.h bench.h $O/lmbench.a
-	$(COMPILE) -o $O/lat_http lat_http.c $O/lmbench.a $(LDLIBS)
+	$(COMPILE) -o $O/lat_http lat_http.c $O/lmbench.a $(LDLIBS) -ltirpc
 
 $O/bw_file_rd.s:bw_file_rd.c timing.h stats.h bench.h
 $O/bw_file_rd:  bw_file_rd.c timing.h stats.h bench.h $O/lmbench.a
@@ -308,7 +292,7 @@ $O/bw_pipe:  bw_pipe.c timing.h stats.h bench.h $O/lmbench.a
 
 $O/bw_tcp.s:bw_tcp.c bench.h timing.h stats.h lib_tcp.h
 $O/bw_tcp:  bw_tcp.c bench.h timing.h stats.h lib_tcp.h $O/lmbench.a
-	$(COMPILE) -o $O/bw_tcp bw_tcp.c $O/lmbench.a $(LDLIBS)
+	$(COMPILE) -o $O/bw_tcp bw_tcp.c $O/lmbench.a $(LDLIBS) -ltirpc
 
 $O/bw_udp.s:bw_udp.c bench.h timing.h stats.h lib_udp.h
 $O/bw_udp:  bw_udp.c bench.h timing.h stats.h lib_udp.h $O/lmbench.a
@@ -336,7 +320,7 @@ $O/lat_alarm:  lat_alarm.c timing.h stats.h bench.h $O/lmbench.a
 
 $O/lat_connect.s:lat_connect.c lib_tcp.c bench.h lib_tcp.h timing.h stats.h
 $O/lat_connect:  lat_connect.c lib_tcp.c bench.h lib_tcp.h timing.h stats.h $O/lmbench.a
-	$(COMPILE) -o $O/lat_connect lat_connect.c $O/lmbench.a $(LDLIBS)
+	$(COMPILE) -o $O/lat_connect lat_connect.c $O/lmbench.a $(LDLIBS) -ltirpc
 
 $O/lat_unix_connect.s:lat_unix_connect.c lib_tcp.c bench.h lib_tcp.h timing.h stats.h
 $O/lat_unix_connect:  lat_unix_connect.c lib_tcp.c bench.h lib_tcp.h timing.h stats.h $O/lmbench.a
@@ -392,11 +376,11 @@ $O/lat_fifo:  lat_fifo.c timing.h stats.h bench.h $O/lmbench.a
 
 $O/lat_proc.s:lat_proc.c timing.h stats.h bench.h
 $O/lat_proc:  lat_proc.c timing.h stats.h bench.h $O/lmbench.a
-	$(COMPILE) -o $O/lat_proc lat_proc.c $O/lmbench.a $(LDLIBS)
+	$(COMPILE) -o $O/lat_proc lat_proc.c $O/lmbench.a $(LDLIBS) -ltirpc
 
 $O/lat_rpc.s:lat_rpc.c timing.h stats.h bench.h
 $O/lat_rpc:  lat_rpc.c timing.h stats.h bench.h $O/lmbench.a
-	$(COMPILE) -o $O/lat_rpc lat_rpc.c $O/lmbench.a $(LDLIBS)
+	$(COMPILE) -o $O/lat_rpc lat_rpc.c $O/lmbench.a $(LDLIBS) -ltirpc
 
 $O/lat_sig.s:lat_sig.c timing.h stats.h bench.h
 $O/lat_sig:  lat_sig.c timing.h stats.h bench.h $O/lmbench.a
@@ -408,15 +392,15 @@ $O/lat_syscall:  lat_syscall.c timing.h stats.h bench.h $O/lmbench.a
 
 $O/lat_select.s:  lat_select.c timing.h stats.h bench.h
 $O/lat_select:  lat_select.c timing.h stats.h bench.h $O/lmbench.a
-	$(COMPILE) -o $O/lat_select lat_select.c $O/lmbench.a $(LDLIBS)
+	$(COMPILE) -o $O/lat_select lat_select.c $O/lmbench.a $(LDLIBS) -ltirpc
 
 $O/lat_tcp.s:lat_tcp.c timing.h stats.h bench.h lib_tcp.h
 $O/lat_tcp:  lat_tcp.c timing.h stats.h bench.h lib_tcp.h $O/lmbench.a
-	$(COMPILE) -o $O/lat_tcp lat_tcp.c $O/lmbench.a $(LDLIBS)
+	$(COMPILE) -o $O/lat_tcp -ltirpc lat_tcp.c $O/lmbench.a $(LDLIBS) -ltirpc
 
 $O/lat_udp.s:lat_udp.c timing.h stats.h bench.h lib_udp.h
 $O/lat_udp:  lat_udp.c timing.h stats.h bench.h lib_udp.h $O/lmbench.a
-	$(COMPILE) -o $O/lat_udp lat_udp.c $O/lmbench.a $(LDLIBS)
+	$(COMPILE) -o $O/lat_udp -ltirpc lat_udp.c $O/lmbench.a $(LDLIBS) -ltirpc
 
 $O/lat_unix.s:lat_unix.c timing.h stats.h bench.h
 $O/lat_unix:  lat_unix.c timing.h stats.h bench.h $O/lmbench.a
