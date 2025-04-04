@@ -156,7 +156,7 @@ char   *cmds[] = {
 
 
 void error(char *);
-void    done();
+void    done(int signum);
 #ifdef	DBG
 extern int dbg;
 #endif
@@ -340,7 +340,7 @@ main(int ac, char **av)
 		register int moved;
 
 		if (gotcnt && count-- <= 0) {
-			done();
+			done(0);
 		}
 
 		/*
@@ -453,7 +453,7 @@ main(int ac, char **av)
 			perror("read");
 		}
 		if (moved <= 0) {
-			done();
+			done(0);
 		}
 		if (inpat != -1) {
 			register int foo, cnt;
@@ -466,7 +466,7 @@ main(int ac, char **av)
 					    (uint)(off + foo*sizeof(int)),
 					    buf[foo]);
 					if (mismatch != -1 && --misses == 0) {
-						done();
+						done(0);
 					}
 				}
 			}
@@ -531,7 +531,7 @@ main(int ac, char **av)
 			if (moved2 != moved) {
 				fprintf(stderr, "write: wanted=%d got=%d\n",
 				    moved, moved2);
-				done();
+				done(0);
 			}
 			if ((Wtmax != -1) || (Wtmin != -1)) {
 				int mics = stop(&start_tv, &stop_tv);
@@ -568,7 +568,7 @@ main(int ac, char **av)
 				perror("write");
 			}
 			if (moved2 != moved) {
-				done();
+				done(0);
 			}
 
 			if (touch) {
@@ -634,7 +634,7 @@ chkarg(char *arg)
 }
 
 void 
-done(void)
+done(int signum)
 {
 	int	i;
 	int	step;

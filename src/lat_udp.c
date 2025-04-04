@@ -19,7 +19,7 @@ char	*id = "$Id$\n";
 
 void	client_main(int ac, char **av);
 void	server_main();
-void	timeout();
+void	timeout(int signum);
 void	init(iter_t iterations, void* cookie);
 void	cleanup(iter_t iterations, void* cookie);
 void    doit(iter_t iterations, void* cookie);
@@ -164,7 +164,7 @@ cleanup(iter_t iterations, void* cookie)
 }
 
 void
-timeout()
+timeout(int signum)
 {
 	fprintf(stderr, "Recv timed out\n");
 	exit(1);

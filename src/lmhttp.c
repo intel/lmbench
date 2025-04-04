@@ -26,7 +26,7 @@ char	*buf;
 char	*bufs[3];
 int	Dflg, dflg, nflg, lflg, fflg, zflg;
 int	data, logfile;
-void	die();
+void	die(int signum);
 void	worker();
 char	*http_time(void);
 char	*date(time_t *tt);
@@ -387,7 +387,7 @@ logit(int sock, char *name, int size)
 	nbytes += len;
 }
 
-void die()
+void die(int signum)
 {
 	if (nbytes) {
 		write(logfile, logbuf, nbytes);
