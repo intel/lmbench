@@ -84,7 +84,7 @@ int	norepeats = -1;
 	bds_msg	*m1, *m2;
 #endif
 
-uint64	getarg();
+uint64	getarg(char *s, int ac, char **av);
 int	been_there(uint64 off);
 int	getfile(char *s, int ac, char **av);
 
@@ -170,7 +170,7 @@ main(int ac, char **av)
 	int     Fork, misses, mismatch, outpat, inpat, in, timeopen, gotcnt;
 	int	slp;
 	uint64	skip, size, count;
-	void	chkarg();
+	void	chkarg(char *arg);
 	int     i;
 	uint64	off = 0;
 	int	touch;

@@ -190,16 +190,14 @@ client_rpc_xact_1(char *argp, CLIENT *clnt)
  */
 /* ARGSUSED */
 char	*
-rpc_xact_1(msg, transp)
-     	char	*msg;
-	register SVCXPRT *transp;
+rpc_xact_1(char *msg, register SVCXPRT *transp)
 {
 	static char r = 123;
 
 	return &r;
 }
 
-static void xact_prog_1();
+static void xact_prog_1(struct svc_req *rqstp, register SVCXPRT *transp);
 
 void
 server_main()
@@ -237,16 +235,14 @@ server_main()
 }
 
 static void
-xact_prog_1(rqstp, transp)
-	struct svc_req *rqstp;
-	register SVCXPRT *transp;
+xact_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 {
 	union {
 		char rpc_xact_1_arg;
 	} argument;
 	char *result;
-	bool_t (*xdr_argument)(), (*xdr_result)();
-	char *(*local)();
+	bool_t (*xdr_argument)(XDR *, char *), (*xdr_result)(XDR *, char *);
+	char *(*local)(char *, struct svc_req *);
 
 	switch (rqstp->rq_proc) {
 	case NULLPROC:
@@ -256,7 +252,7 @@ xact_prog_1(rqstp, transp)
 	case RPC_XACT:
 		xdr_argument = xdr_char;
 		xdr_result = xdr_char;
-		local = (char *(*)()) rpc_xact_1;
+		local = (char *(*)(char *, struct svc_req *)) rpc_xact_1;
 		break;
 
 	case RPC_EXIT:
@@ -273,7 +269,7 @@ xact_prog_1(rqstp, transp)
 		svcerr_decode(transp);
 		return;
 	}
-	result = (*local)(&argument, rqstp);
+	result = (*local)((char *)&argument, rqstp);
 	if (result != NULL && !svc_sendreply(transp, (xdrproc_t)xdr_result, result)) {
 		svcerr_systemerr(transp);
 	}
