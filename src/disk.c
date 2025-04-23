@@ -46,7 +46,7 @@ zone(char *disk, int oflag, int bsize)
 	int	n;
 	int	fd;
 	uint64	off;
-	int	stride;
+	uint64	stride;
 
 	if ((fd = open(disk, oflag)) == -1) {
 		perror(disk);
@@ -85,8 +85,8 @@ zone(char *disk, int oflag, int bsize)
 	if (bsize > stride) stride = bsize;
 
 	off *= ZONEPOINTS;
-	debug((stdout, "stride=%d bs=%d size=%dM points=%d\n",
-	    stride, bsize, (int)(off >> 20), (int)(off/stride)));
+	debug((stdout, "stride=%u bs=%d size=%uM points=%u\n",
+	    stride, bsize, (uint64)(off >> 20), (uint64)(off/stride)));
 
 	/*
 	 * Read buf's worth of data every stride and time it.
@@ -139,12 +139,12 @@ seek(char *disk, int oflag)
 {
 	char	*buf;
 	int	fd;
-	off64_t	size;
-	off64_t	begin, end;
+	uint64	size;
+	uint64	begin, end;
 	int	usecs;
 	int	error;
 	int	tot_msec = 0, tot_io = 0;
-	int	stride;
+	uint64	stride;
 
 	if ((fd = open(disk, oflag)) == -1) {
 		perror(disk);
@@ -171,8 +171,8 @@ seek(char *disk, int oflag)
 	stride >>= 9;
 	stride <<= 9;
 
-	debug((stdout, "stride=%d size=%dM points=%d\n",
-	    stride, (int)(size >> 20), (int)(size/stride)));
+	debug((stdout, "stride=%u size=%uM points=%u\n",
+	    stride, (uint64)(size >> 20), (uint64)(size/stride)));
 
 	end = size;
 	begin = 0;
