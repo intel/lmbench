@@ -97,7 +97,7 @@ reader(iter_t iterations, void* cookie)
 	size_t	todo = state->bytes;
 
 	while (iterations-- > 0) {
-		write(state->control[1], &todo, sizeof(todo));
+		(void) !write(state->control[1], &todo, sizeof(todo));
 		for (done = 0; done < todo; done += n) {
 			if ((n = read(state->pipes[0], state->buf, state->xfer)) <= 0) {
 				/* error! */
@@ -114,7 +114,7 @@ writer(int controlfd, int writefd, char* buf, void* cookie)
 	struct _state* state = (struct _state*)cookie;
 
 	for ( ;; ) {
-		read(controlfd, &todo, sizeof(todo));
+		(void) !read(controlfd, &todo, sizeof(todo));
 		for (done = 0; done < todo; done += n) {
 #ifdef TOUCH
 			touch(buf, XFERSIZE);

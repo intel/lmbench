@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "bench.h"
 
 /* #define _DEBUG */
@@ -205,7 +206,8 @@ sched_pin(int cpu)
 		if (sz<sizeof(cpu_set_t)/sizeof(unsigned long)) sz = sizeof(cpu_set_t)/sizeof(unsigned long);
 		mask = (unsigned long*)malloc(sz * sizeof(unsigned long));
 		cpumask = (unsigned long*)malloc(sz * sizeof(unsigned long));
-		retval = sched_getaffinity(0, sz * sizeof(unsigned long), cpumask);
+		retval = sched_getaffinity(0, sz * sizeof(unsigned long),
+					(cpu_set_t *) cpumask);
 		if (retval < 0) perror("sched_getaffinity:");
 		if (retval < 0) return retval;
 
@@ -229,7 +231,8 @@ sched_pin(int cpu)
 			j++;
 		}
 	}
-	retval = sched_setaffinity(0, sz * sizeof(unsigned long), mask);
+	retval = sched_setaffinity(0, sz * sizeof(unsigned long),
+			(const cpu_set_t *) mask);
 	if (retval < 0) perror("sched_setaffinity:");
 #ifdef _DEBUG
 	fprintf(stderr, "sched_pin(%d): pid=%d, returning %d\n", cpu, (int)getpid(), retval);

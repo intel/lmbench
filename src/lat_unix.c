@@ -94,7 +94,7 @@ initialize(iter_t iterations, void* cookie)
 	/* Child sits and ping-pongs packets back to parent */
 	signal(SIGTERM, exit);
 	while (read(pState->sv[0], pState->buf, pState->msize) == pState->msize) {
-		write(pState->sv[0], pState->buf, pState->msize);
+		(void) !write(pState->sv[0], pState->buf, pState->msize);
 	}
 	exit(0);
 }

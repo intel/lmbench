@@ -117,7 +117,7 @@ mkfile(char *name, size_t size)
 
 	while (size > 0) {
 		chunk = ((size > (128*1024)) ? (128*1024) : size);
-		write(fd, buf, chunk);
+		(void) !write(fd, buf, chunk);
 		size -= chunk;
 	}
 	close(fd);

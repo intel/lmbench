@@ -18,8 +18,6 @@ done
 
 trap 'rm -f ${BASE}$$.s ${BASE}$$.c ${BASE}$$.o ${BASE}$$; exit 1' 1 2 15
 
-LDLIBS=-lm
-
 # check for HP-UX's ANSI compiler
 echo "main(int ac, char *av[]) { int i; }" > ${BASE}$$.c
 if ${CC} ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c 1>${NULL} 2>${NULL}
@@ -33,7 +31,7 @@ else
 	fi
 fi
 rm -f ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
-	
+
 # check for IA64 HP-UX w/ HP's ANSI compiler; may need pointer swizzling
 arch=`echo $OS | awk -F- '{print $1;}'`
 if [ X$CC = "Xcc" -a X$arch = "Xia64" ]
@@ -48,7 +46,7 @@ then
 		&& CFLAGS="${CFLAGS} +DD64"
 	rm -f ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
 fi
-	
+
 # check for bcopy (optionally set the SYS5 flag)
 echo "#include <string.h>" > ${BASE}$$.c
 echo "main() { char a[256], b[256]; bcopy(a, b, 256); }" >> ${BASE}$$.c
@@ -236,15 +234,20 @@ ${CC} ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c 1>${NULL} 2>${NULL} \
 	&& CFLAGS="${CFLAGS} -DHAVE_BINDPROCESSOR=1";
 rm -f ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
 
-# check that we have sched_setaffinity
-echo "#include <stdlib.h>" > ${BASE}$$.c
-echo "#include <unistd.h>" >> ${BASE}$$.c
-echo "#include <sched.h>" >> ${BASE}$$.c
-echo "main() { unsigned long mask = 1; return sched_setaffinity(0, sizeof(unsigned long), &mask); }" >> ${BASE}$$.c
-${CC} ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c 1>${NULL} 2>${NULL} \
-	&& CFLAGS="${CFLAGS} -DHAVE_SCHED_SETAFFINITY=1";
-rm -f ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
-
+# check that we have sched_setaffinity and it builds cleanly
+cat << '_ACEOF' > ${BASE}$$.c
+#define _GNU_SOURCE
+#include <stdlib.h>
+#include <unistd.h>
+#include <sched.h>
+int main() {
+cpu_set_t set; CPU_ZERO(&set); CPU_SET(0, &set);
+if (sched_setaffinity(0, sizeof(set), &set) == -1) exit(EXIT_FAILURE); exit(EXIT_SUCCESS);
+}
+_ACEOF
+${CC} ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c ${LDLIBS} 1>${NULL} 2>${BASE}$$_err
+test -s ${BASE}$$_err || CFLAGS="${CFLAGS} -DHAVE_SCHED_SETAFFINITY=1"
+rm -f ${BASE}$$_err ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
 
 if [ ! -d ${BINDIR} ]; then mkdir -p ${BINDIR}; fi
 #LDLIBS="${LDLIBS} -ltirpc"

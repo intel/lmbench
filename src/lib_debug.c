@@ -1,3 +1,4 @@
+#include <math.h>
 #include "bench.h"
 #include "lib_debug.h"
 

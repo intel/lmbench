@@ -29,11 +29,11 @@ http(char *server, char *file, int prog)
 	if (debug) {
 		printf(buf);
 	}
-	write(sock, buf, strlen(buf));
+	(void) !write(sock, buf, strlen(buf));
 	while ((n = read(sock, buf, XFERSIZE)) > 0) {
 		b += n;
 		if (echo) {
-			write(1, buf, n);
+			(void) !write(1, buf, n);
 		}
 	}
 	close(sock);
@@ -49,7 +49,7 @@ killhttp(char *server, int prog)
 	int     sock;
 
 	sock = tcp_connect(server, prog, SOCKOPT_REUSE);
-	write(sock, "EXIT", 4);
+	(void) !write(sock, "EXIT", 4);
 	close(sock);
 }
 

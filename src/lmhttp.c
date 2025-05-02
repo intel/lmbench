@@ -277,26 +277,34 @@ void
 dodir(char *name, int sock)
 {
 	FILE	*p;
-	char	buf[1024];
+	char	*buf;
 	char	path[1024];
+	size_t 	bytes;
 
 	if (dflg) printf("dodir(%s)\n", name);
+	/* figure out a buf size and allocate with malloc */
+	bytes = snprintf(buf, 0, "cd %s && ls -1a", name);
+	buf = (char*) malloc(bytes + 1);
 	sprintf(buf, "cd %s && ls -1a", name);
 	p = popen(buf, "r");
 	if (!p && dflg) printf("Couldn't popen %s\n", buf);
+	bytes = snprintf(buf, 0, "\
+<HTML><HEAD>\n<TITLE>Index of /%s</TITLE></HEAD><BODY><H1>Index of /%s</H1>\n",
+	    name, name);
+	buf = (char*) realloc(buf, bytes + 1);
 	sprintf(buf, "\
 <HTML><HEAD>\n<TITLE>Index of /%s</TITLE></HEAD><BODY><H1>Index of /%s</H1>\n",
 	    name, name);
-	write(sock, buf, strlen(buf));
+	(void) !write(sock, buf, strlen(buf));
 	while (fgets(buf, sizeof(buf), p)) {
 		buf[strlen(buf) - 1] = 0;
 		sprintf(path, "/%s/%s", name, buf);
 		if (dflg) printf("\t%s\n", path);
-		write(sock, "<A HREF=\"", 9);
-		write(sock, path, strlen(path));
-		write(sock, "\">", 2);
-		write(sock, buf, strlen(buf));
-		write(sock, "</A><BR>\n", 9);
+		(void) !write(sock, "<A HREF=\"", 9);
+		(void) !write(sock, path, strlen(path));
+		(void) !write(sock, "\">", 2);
+		(void) !write(sock, buf, strlen(buf));
+		(void) !write(sock, "</A><BR>\n", 9);
 	}
 	pclose(p);
 }
@@ -380,7 +388,7 @@ logit(int sock, char *name, int size)
 	len = sprintf(buf, "%u %u %s %u\n",
 	    *((unsigned int*)&sin.sin_addr), (unsigned int)time(0), name, size);
 	if (nbytes + len >= sizeof(logbuf)) {
-		write(logfile, logbuf, nbytes);
+		(void) !write(logfile, logbuf, nbytes);
 		nbytes = 0;
 	}
 	bcopy(buf, &logbuf[nbytes], len);
@@ -390,7 +398,7 @@ logit(int sock, char *name, int size)
 void die()
 {
 	if (nbytes) {
-		write(logfile, logbuf, nbytes);
+		(void) !write(logfile, logbuf, nbytes);
 		nbytes = 0;
 	}
 	exit(1);
