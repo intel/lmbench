@@ -53,6 +53,9 @@ void	wr64(iter_t iterations, void *cookie);
 void	rdwr64(iter_t iterations, void *cookie);
 void	mcp64(iter_t iterations, void *cookie);
 
+void	wrc(iter_t iterations, void *cookie);
+void	wrs(iter_t iterations, void *cookie);
+
 typedef struct _state {
 	double	overhead;
 	size_t	nbytes;
@@ -195,6 +198,12 @@ main(int ac, char **av)
 			warmup, repetitions, &state);
 	} else if (streq(av[optind+1], "cp64")) {
 		benchmp(init_loop, mcp64, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "wrc")) {
+		benchmp(init_loop, wrc, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "wrs")) {
+		benchmp(init_loop, wrs, cleanup, 0, parallel,
 			warmup, repetitions, &state);
 	} else {
 		lmbench_usage(ac, av, usage);
@@ -814,3 +823,86 @@ mcp64(iter_t iterations, void *cookie)
 	use_pointer(p_save);
 }
 #undef	DOIT
+
+void
+wrc(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	TYPE* p_save = NULL;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+		    asm volatile(
+			    "mov $1, %%rax\n\t"
+			    "vpbroadcastq %%rax, %%zmm0\n\t"
+			    "vmovdqa64 %%zmm0, 0(%0)\n\t"
+			    "vmovdqa64 %%zmm0, 64(%0)\n\t"
+			    "vmovdqa64 %%zmm0, 128(%0)\n\t"
+			    "vmovdqa64 %%zmm0, 192(%0)\n\t"
+			    "vmovdqa64 %%zmm0, 256(%0)\n\t"
+			    "vmovdqa64 %%zmm0, 320(%0)\n\t"
+			    "vmovdqa64 %%zmm0, 384(%0)\n\t"
+			    "vmovdqa64 %%zmm0, 448(%0)"
+			    :
+			    : "r" (p)
+			    : "rax", "zmm0", "memory"
+			    );
+		    p += 64;
+#elif defined(__aarch64__)
+		    asm volatile(
+			    "dc zva, %[ptr]\n"
+			    "dc zva, %[ptr1]\n"
+			    "dc zva, %[ptr2]\n"
+			    "dc zva, %[ptr3]\n"
+			    "dc zva, %[ptr4]\n"
+			    "dc zva, %[ptr5]\n"
+			    "dc zva, %[ptr6]\n"
+			    "dc zva, %[ptr7]"
+			    : // no output
+			    : [ptr]  "r" (p),
+			      [ptr1] "r" (p + 8),
+			      [ptr2] "r" (p + 16),
+			      [ptr3] "r" (p + 24),
+			      [ptr4] "r" (p + 32),
+			      [ptr5] "r" (p + 40),
+			      [ptr6] "r" (p + 48),
+			      [ptr7] "r" (p + 56)
+			    : "memory");
+		    p += 64;
+#endif
+	    }
+	    p_save = p;
+	}
+	use_pointer(p_save);
+}
+
+void
+wrs(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	TYPE* p_save = NULL;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+		    long count = 64;
+		    asm volatile (
+			    "cld\n\t"
+			    "rep stosq"
+			    : "+D" (p), "+c" (count)
+			    : "a" (1)
+			    : "memory"
+			    );
+#else
+		    p += 64;
+#endif
+	    }
+	    p_save = p;
+	}
+	use_pointer(p_save);
+}
