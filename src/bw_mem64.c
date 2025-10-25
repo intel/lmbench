@@ -40,6 +40,19 @@ void	init_overhead(iter_t iterations, void *cookie);
 void	init_loop(iter_t iterations, void *cookie);
 void	cleanup(iter_t iterations, void *cookie);
 
+void	rd8(iter_t iterations, void *cookie);
+void	wr8(iter_t iterations, void *cookie);
+void	rdwr8(iter_t iterations, void *cookie);
+void	mcp8(iter_t iterations, void *cookie);
+void	rd32(iter_t iterations, void *cookie);
+void	wr32(iter_t iterations, void *cookie);
+void	rdwr32(iter_t iterations, void *cookie);
+void	mcp32(iter_t iterations, void *cookie);
+void	rd64(iter_t iterations, void *cookie);
+void	wr64(iter_t iterations, void *cookie);
+void	rdwr64(iter_t iterations, void *cookie);
+void	mcp64(iter_t iterations, void *cookie);
+
 typedef struct _state {
 	double	overhead;
 	size_t	nbytes;
@@ -134,6 +147,54 @@ main(int ac, char **av)
 			warmup, repetitions, &state);
 	} else if (streq(av[optind+1], "bcopy")) {
 		benchmp(init_loop, loop_bcopy, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rd8")) {
+		benchmp(init_loop, rd8, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "wr8")) {
+		benchmp(init_loop, wr8, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rdwr8")) {
+		benchmp(init_loop, rdwr8, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "cp8")) {
+		benchmp(init_loop, mcp8, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rd16")) {
+		benchmp(init_loop, rd, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "wr16")) {
+		benchmp(init_loop, wr, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rdwr16")) {
+		benchmp(init_loop, rdwr, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "cp16")) {
+		benchmp(init_loop, mcp, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rd32")) {
+		benchmp(init_loop, rd32, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "wr32")) {
+		benchmp(init_loop, wr32, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rdwr32")) {
+		benchmp(init_loop, rdwr32, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "cp32")) {
+		benchmp(init_loop, mcp32, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rd64")) {
+		benchmp(init_loop, rd64, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "wr64")) {
+		benchmp(init_loop, wr64, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rdwr64")) {
+		benchmp(init_loop, rdwr64, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "cp64")) {
+		benchmp(init_loop, mcp64, cleanup, 0, parallel,
 			warmup, repetitions, &state);
 	} else {
 		lmbench_usage(ac, av, usage);
@@ -383,6 +444,7 @@ fcp(iter_t iterations, void *cookie)
 	    }
 	}
 }
+#undef DOIT
 
 void
 loop_bzero(iter_t iterations, void *cookie)
@@ -468,3 +530,287 @@ void print_child_bandwidth(uint64 bytes, int parallel, double overhd)
 				   stat->avg_time_per_iter, stat->stddev, 1);
 	}
 }
+
+void
+rd8(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	register TYPE sum = 0;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+		sum +=
+#define	DOIT(i)	p[i]+
+		DOIT(0) DOIT(1) DOIT(2) DOIT(3) DOIT(4) DOIT(5) DOIT(6)
+		DOIT(7) DOIT(8) DOIT(9) DOIT(10) DOIT(11) DOIT(12) DOIT(13)
+		DOIT(14) DOIT(15) DOIT(16) DOIT(17) DOIT(18) DOIT(19) DOIT(20)
+		DOIT(21) DOIT(22) DOIT(23) DOIT(24) DOIT(25) DOIT(26) DOIT(27)
+		DOIT(28) DOIT(29) DOIT(30) DOIT(31) DOIT(32) DOIT(33) DOIT(34)
+		DOIT(35) DOIT(36) DOIT(37) DOIT(38) DOIT(39) DOIT(40) DOIT(41)
+		DOIT(42) DOIT(43) DOIT(44) DOIT(45) DOIT(46) DOIT(47) DOIT(48)
+		DOIT(49) DOIT(50) DOIT(51) DOIT(52) DOIT(53) DOIT(54) DOIT(55)
+		DOIT(56) DOIT(57) DOIT(58) DOIT(59) DOIT(60) DOIT(61) DOIT(62)
+		p[63];
+		p +=  64;
+	    }
+	}
+	use_int(sum);
+}
+#undef	DOIT
+
+void
+wr8(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#define	DOIT(i)	p[i] = 1;
+		DOIT(0) DOIT(1) DOIT(2) DOIT(3) DOIT(4) DOIT(5) DOIT(6)
+		DOIT(7) DOIT(8) DOIT(9) DOIT(10) DOIT(11) DOIT(12) DOIT(13)
+		DOIT(14) DOIT(15) DOIT(16) DOIT(17) DOIT(18) DOIT(19) DOIT(20)
+		DOIT(21) DOIT(22) DOIT(23) DOIT(24) DOIT(25) DOIT(26) DOIT(27)
+		DOIT(28) DOIT(29) DOIT(30) DOIT(31) DOIT(32) DOIT(33) DOIT(34)
+		DOIT(35) DOIT(36) DOIT(37) DOIT(38) DOIT(39) DOIT(40) DOIT(41)
+		DOIT(42) DOIT(43) DOIT(44) DOIT(45) DOIT(46) DOIT(47) DOIT(48)
+		DOIT(49) DOIT(50) DOIT(51) DOIT(52) DOIT(53) DOIT(54) DOIT(55)
+		DOIT(56) DOIT(57) DOIT(58) DOIT(59) DOIT(60) DOIT(61) DOIT(62)
+		DOIT(63);
+		p +=  64;
+	    }
+	}
+}
+#undef	DOIT
+
+void
+rdwr8(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	register TYPE sum = 0;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#define	DOIT(i)	sum += p[i]; p[i] = 1;
+		DOIT(0) DOIT(1) DOIT(2) DOIT(3) DOIT(4) DOIT(5) DOIT(6)
+		DOIT(7) DOIT(8) DOIT(9) DOIT(10) DOIT(11) DOIT(12) DOIT(13)
+		DOIT(14) DOIT(15) DOIT(16) DOIT(17) DOIT(18) DOIT(19) DOIT(20)
+		DOIT(21) DOIT(22) DOIT(23) DOIT(24) DOIT(25) DOIT(26) DOIT(27)
+		DOIT(28) DOIT(29) DOIT(30) DOIT(31) DOIT(32) DOIT(33) DOIT(34)
+		DOIT(35) DOIT(36) DOIT(37) DOIT(38) DOIT(39) DOIT(40) DOIT(41)
+		DOIT(42) DOIT(43) DOIT(44) DOIT(45) DOIT(46) DOIT(47) DOIT(48)
+		DOIT(49) DOIT(50) DOIT(51) DOIT(52) DOIT(53) DOIT(54) DOIT(55)
+		DOIT(56) DOIT(57) DOIT(58) DOIT(59) DOIT(60) DOIT(61) DOIT(62)
+		DOIT(63);
+		p +=  64;
+	    }
+	}
+	use_int(sum);
+}
+#undef	DOIT
+
+void
+mcp8(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	TYPE* p_save = NULL;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    register TYPE *dst = state->buf2;
+	    while (p <= lastone) {
+#define	DOIT(i)	dst[i] = p[i];
+		DOIT(0) DOIT(1) DOIT(2) DOIT(3) DOIT(4) DOIT(5) DOIT(6)
+		DOIT(7) DOIT(8) DOIT(9) DOIT(10) DOIT(11) DOIT(12) DOIT(13)
+		DOIT(14) DOIT(15) DOIT(16) DOIT(17) DOIT(18) DOIT(19) DOIT(20)
+		DOIT(21) DOIT(22) DOIT(23) DOIT(24) DOIT(25) DOIT(26) DOIT(27)
+		DOIT(28) DOIT(29) DOIT(30) DOIT(31) DOIT(32) DOIT(33) DOIT(34)
+		DOIT(35) DOIT(36) DOIT(37) DOIT(38) DOIT(39) DOIT(40) DOIT(41)
+		DOIT(42) DOIT(43) DOIT(44) DOIT(45) DOIT(46) DOIT(47) DOIT(48)
+		DOIT(49) DOIT(50) DOIT(51) DOIT(52) DOIT(53) DOIT(54) DOIT(55)
+		DOIT(56) DOIT(57) DOIT(58) DOIT(59) DOIT(60) DOIT(61) DOIT(62)
+		DOIT(63);
+		p += 64;
+		dst += 64;
+	    }
+	    p_save = p;
+	}
+	use_pointer(p_save);
+}
+#undef	DOIT
+
+void
+rd32(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	register TYPE sum = 0;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+		sum +=
+#define	DOIT(i)	p[i]+
+		DOIT(0) DOIT(4) DOIT(8) DOIT(12) DOIT(16) DOIT(20) DOIT(24)
+		DOIT(28) DOIT(32) DOIT(36) DOIT(40) DOIT(44) DOIT(48) DOIT(52)
+		DOIT(56)
+		p[60];
+		p +=  64;
+	    }
+	}
+	use_int(sum);
+}
+#undef	DOIT
+
+void
+wr32(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#define	DOIT(i)	p[i] = 1;
+		DOIT(0) DOIT(4) DOIT(8) DOIT(12) DOIT(16) DOIT(20) DOIT(24)
+		DOIT(28) DOIT(32) DOIT(36) DOIT(40) DOIT(44) DOIT(48) DOIT(52)
+		DOIT(56) DOIT(60);
+		p +=  64;
+	    }
+	}
+}
+#undef	DOIT
+
+void
+rdwr32(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	register TYPE sum = 0;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#define	DOIT(i)	sum += p[i]; p[i] = 1;
+		DOIT(0) DOIT(4) DOIT(8) DOIT(12) DOIT(16) DOIT(20) DOIT(24)
+		DOIT(28) DOIT(32) DOIT(36) DOIT(40) DOIT(44) DOIT(48) DOIT(52)
+		DOIT(56) DOIT(60);
+		p +=  64;
+	    }
+	}
+	use_int(sum);
+}
+#undef	DOIT
+
+void
+mcp32(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	TYPE* p_save = NULL;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    register TYPE *dst = state->buf2;
+	    while (p <= lastone) {
+#define	DOIT(i)	dst[i] = p[i];
+		DOIT(0) DOIT(4) DOIT(8) DOIT(12) DOIT(16) DOIT(20) DOIT(24)
+		DOIT(28) DOIT(32) DOIT(36) DOIT(40) DOIT(44) DOIT(48) DOIT(52)
+		DOIT(56) DOIT(60);
+		p += 64;
+		dst += 64;
+	    }
+	    p_save = p;
+	}
+	use_pointer(p_save);
+}
+#undef	DOIT
+
+void
+rd64(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	register TYPE sum = 0;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+		sum +=
+#define	DOIT(i)	p[i]+
+		DOIT(0) DOIT(8) DOIT(16) DOIT(24)
+		DOIT(32) DOIT(40) DOIT(48)
+		p[56];
+		p +=  64;
+	    }
+	}
+	use_int(sum);
+}
+#undef	DOIT
+
+void
+wr64(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#define	DOIT(i)	p[i] = 1;
+		DOIT(0) DOIT(8) DOIT(16) DOIT(24)
+		DOIT(32) DOIT(40) DOIT(48) DOIT(56);
+		p +=  64;
+	    }
+	}
+}
+#undef	DOIT
+
+void
+rdwr64(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	register TYPE sum = 0;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#define	DOIT(i)	sum += p[i]; p[i] = 1;
+		DOIT(0) DOIT(8) DOIT(16) DOIT(24)
+		DOIT(32) DOIT(40) DOIT(48) DOIT(56);
+		p +=  64;
+	    }
+	}
+	use_int(sum);
+}
+#undef	DOIT
+
+void
+mcp64(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	TYPE* p_save = NULL;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    register TYPE *dst = state->buf2;
+	    while (p <= lastone) {
+#define	DOIT(i)	dst[i] = p[i];
+		DOIT(0) DOIT(8) DOIT(16) DOIT(24)
+		DOIT(32) DOIT(40) DOIT(48) DOIT(56);
+		p += 64;
+		dst += 64;
+	    }
+	    p_save = p;
+	}
+	use_pointer(p_save);
+}
+#undef	DOIT
