@@ -19,6 +19,7 @@ typedef unsigned char bool_t;
 #include        <fcntl.h>
 #include        <signal.h>
 #include        <errno.h>
+#include	<math.h>
 #ifndef WIN32
 #include        <strings.h>
 #endif
