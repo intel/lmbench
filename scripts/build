@@ -18,7 +18,7 @@ done
 
 trap 'rm -f ${BASE}$$.s ${BASE}$$.c ${BASE}$$.o ${BASE}$$; exit 1' 1 2 15
 
-LDLIBS="-lm -ltirpc"
+LDLIBS="-lm"
 
 # check for HP-UX's ANSI compiler
 echo "main(int ac, char *av[]) { int i; }" > ${BASE}$$.c
@@ -246,9 +246,9 @@ ${CC} ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c 1>${NULL} 2>${NULL} \
 rm -f ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
 
 # check for -ltirpc(RHEL/centos)
-echo "extern int get_myaddress(); main() { get_myaddress(); }" > ${BASE}$$.c
+echo "extern int get_myaddress(); void main() { get_myaddress(); }" > ${BASE}$$.c
 if ! ${CC} ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c 1>${NULL} 2>${NULL}; then
-	${CC} ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c -ltirpc 1>${NULL} 2>${NULL} \
+	${CC} -I/usr/include/tirpc ${CFLAGS} -o ${BASE}$$ ${BASE}$$.c -ltirpc 1>${NULL} 2>${NULL} \
 		&& LDLIBS="${LDLIBS} -ltirpc" && CFLAGS="${CFLAGS} -I/usr/include/tirpc";
 fi
 rm -f ${BASE}$$ ${BASE}$$.o ${BASE}$$.c
