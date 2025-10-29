@@ -118,19 +118,20 @@ benchmp_sigalrm(int signo)
 	benchmp_sigalrm_timeout = 1;
 }
 
-void 
-benchmp_child(benchmp_f initialize, 
+void
+benchmp_child(benchmp_f initialize,
 	      benchmp_f benchmark,
 	      benchmp_f cleanup,
 	      int childid,
-	      int response, 
-	      int start_signal, 
-	      int result_signal, 
+	      int response,
+	      int start_signal,
+	      int result_signal,
 	      int exit_signal,
-	      int parallel, 
-	      iter_t iterations,
-	      int repetitions,
 	      int enough,
+	      iter_t iterations,
+	      int parallel,
+	      int repetitions,
+	      int calibrate,
 	      void* cookie
 	      );
 void
@@ -149,14 +150,15 @@ benchmp_parent(int response,
 int
 sizeof_result(int repetitions);
 
-void 
-benchmp(benchmp_f initialize, 
+static void
+__benchmp(benchmp_f initialize,
 	benchmp_f benchmark,
 	benchmp_f cleanup,
 	int enough, 
 	int parallel,
 	int warmup,
 	int repetitions,
+	int calibrate,
 	void* cookie)
 {
 	iter_t		iterations = 1;
@@ -184,10 +186,10 @@ benchmp(benchmp_f initialize,
 	settime(0);
 	save_n(1);
 
-	if (parallel > 1) {
+	if (!calibrate) {
 		/* Compute the baseline performance */
-		benchmp(initialize, benchmark, cleanup, 
-			enough, 1, warmup, repetitions, cookie);
+		__benchmp(initialize, benchmark, cleanup,
+			enough, 1, warmup, repetitions, 1, cookie);
 
 		/* if we can't even do a single job, then give up */
 		if (gettime() == 0)
@@ -256,6 +258,7 @@ benchmp(benchmp_f initialize,
 				      iterations,
 				      parallel,
 				      repetitions,
+				      calibrate,
 				      cookie
 				);
 			exit(0);
@@ -321,6 +324,20 @@ cleanup_exit:
 #ifdef _DEBUG
 	fprintf(stderr, "benchmp(0x%x, 0x%x, 0x%x, %d, %d, 0x%x): exiting\n", (unsigned int)initialize, (unsigned int)benchmark, (unsigned int)cleanup, enough, parallel, (unsigned int)cookie);
 #endif
+}
+
+void
+benchmp(benchmp_f initialize,
+	benchmp_f benchmark,
+	benchmp_f cleanup,
+	int enough,
+	int parallel,
+	int warmup,
+	int repetitions,
+	void* cookie)
+{
+	__benchmp(initialize, benchmark, cleanup, enough, parallel, warmup,
+		  repetitions, 0, cookie);
 }
 
 void
@@ -529,6 +546,7 @@ typedef struct {
         iter_t		iterations;
 	int		parallel;
         int		repetitions;
+	int		calibrate;
 	void*		cookie;
 	iter_t		iterations_batch;
 	int		need_warmup;
@@ -591,6 +609,7 @@ benchmp_child(benchmp_f initialize,
 	        iter_t iterations,
 		int parallel, 
 	        int repetitions,
+	        int calibrate,
 		void* cookie
 		)
 {
@@ -616,6 +635,7 @@ benchmp_child(benchmp_f initialize,
 	_benchmp_child_state.iterations_batch = iterations_batch;
 	_benchmp_child_state.parallel = parallel;
 	_benchmp_child_state.repetitions = repetitions;
+	_benchmp_child_state.calibrate = calibrate;
 	_benchmp_child_state.cookie = cookie;
 	_benchmp_child_state.need_warmup = 1;
 	_benchmp_child_state.i = 0;
@@ -710,7 +730,7 @@ benchmp_interval(void* _state)
 		break;
 	case timing_interval:
 		iterations = state->iterations;
-		if (state->parallel > 1 || result > 0.95 * state->enough) {
+		if (!state->calibrate || result > 0.95 * state->enough) {
 			insertsort(gettime(), get_n(), get_results());
 			state->i++;
 			/* we completed all the experiments, return results */
@@ -718,7 +738,7 @@ benchmp_interval(void* _state)
 				state->state = cooldown;
 			}
 		}
-		if (state->parallel == 1 
+		if (state->calibrate
 		    && (result < 0.99 * state->enough || result > 1.2 * state->enough)) {
 			if (result > 150.) {
 				double tmp = iterations / result;
