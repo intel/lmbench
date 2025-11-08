@@ -56,6 +56,12 @@ void	mcp64(iter_t iterations, void *cookie);
 void	wrc(iter_t iterations, void *cookie);
 void	wrs(iter_t iterations, void *cookie);
 
+void	fwr_sse(iter_t iterations, void *cookie);
+void	frd_sse(iter_t iterations, void *cookie);
+
+void	fwr_avx(iter_t iterations, void *cookie);
+void	frd_avx(iter_t iterations, void *cookie);
+
 typedef struct _state {
 	double	overhead;
 	size_t	nbytes;
@@ -204,6 +210,18 @@ main(int ac, char **av)
 			warmup, repetitions, &state);
 	} else if (streq(av[optind+1], "wrs")) {
 		benchmp(init_loop, wrs, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "fwr_sse")) {
+		benchmp(init_loop, fwr_sse, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "frd_sse")) {
+		benchmp(init_loop, frd_sse, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "fwr_avx")) {
+		benchmp(init_loop, fwr_avx, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "frd_avx")) {
+		benchmp(init_loop, frd_avx, cleanup, 0, parallel,
 			warmup, repetitions, &state);
 	} else {
 		lmbench_usage(ac, av, usage);
@@ -901,6 +919,131 @@ wrs(iter_t iterations, void *cookie)
 #else
 		    p += 64;
 #endif
+	    }
+	    p_save = p;
+	}
+	use_pointer(p_save);
+}
+
+#define MOVDQA_LN(loff)			\
+	MOVDQA(loff + 0) MOVDQA(loff + 16)	\
+	MOVDQA(loff + 32) MOVDQA(loff + 48)
+
+#define MOVDQA_BLK				\
+	MOVDQA_LN(0) MOVDQA_LN(64)		\
+	MOVDQA_LN(128) MOVDQA_LN(192)		\
+	MOVDQA_LN(256) MOVDQA_LN(320)		\
+	MOVDQA_LN(384) MOVDQA_LN(448)
+
+void
+fwr_sse(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	TYPE* p_save = NULL;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+#define MOVDQA(off) "movdqa %%xmm0, " #off "(%0)\n\t"
+		    asm volatile(
+			    "mov $1, %%rax\n\t"
+			    "movq %%rax, %%xmm0\n\t"
+			    MOVDQA_BLK
+			    :
+			    : "r" (p)
+			    : "rax", "xmm0", "memory");
+#undef MOVDQA
+#endif
+		p += 64;
+	    }
+	    p_save = p;
+	}
+	use_pointer(p_save);
+}
+
+void
+frd_sse(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+#define MOVDQA(off) "movdqa " #off "(%0), %%xmm0\n\t"
+		    asm volatile(
+			    MOVDQA_BLK
+			    :
+			    : "r" (p)
+			    : "xmm0", "memory");
+#undef MOVDQA
+#endif
+		p += 64;
+	    }
+	}
+}
+
+#define VMOVDQA_LN(loff)			\
+	VMOVDQA(loff + 0) VMOVDQA(loff + 32)
+
+#define VMOVDQA_BLK				\
+	VMOVDQA_LN(0) VMOVDQA_LN(64)		\
+	VMOVDQA_LN(128) VMOVDQA_LN(192)		\
+	VMOVDQA_LN(256) VMOVDQA_LN(320)		\
+	VMOVDQA_LN(384) VMOVDQA_LN(448)
+
+void
+fwr_avx(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	TYPE* p_save = NULL;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+#define VMOVDQA(off) "vmovdqa %%ymm0, " #off "(%0)\n\t"
+		    asm volatile(
+			    "mov $1, %%rax\n\t"
+			    "movq %%rax, %%xmm0\n\t"
+			    VMOVDQA_BLK
+			    :
+			    : "r" (p)
+			    : "rax", "xmm0", "memory");
+#undef VMOVDQA
+#endif
+		p += 64;
+	    }
+	    p_save = p;
+	}
+	use_pointer(p_save);
+}
+
+void
+frd_avx(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+	TYPE* p_save = NULL;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+#define VMOVDQA(off) "vmovdqa " #off "(%0), %%ymm0\n\t"
+		    asm volatile(
+			    VMOVDQA_BLK
+			    :
+			    : "r" (p)
+			    : "xmm0", "memory"
+			    );
+#undef VMOVDQA
+#endif
+		p += 64;
 	    }
 	    p_save = p;
 	}
