@@ -27,6 +27,7 @@ typedef unsigned char bool_t;
 #ifndef WIN32
 #include        <strings.h>
 #endif
+#include        <string.h>
 #include        <sys/types.h>
 #ifndef WIN32
 #include        <sys/mman.h>
