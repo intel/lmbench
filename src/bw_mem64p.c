@@ -32,6 +32,12 @@ void	rw41(iter_t iterations, void *cookie);
 void	rw51(iter_t iterations, void *cookie);
 void	rw61(iter_t iterations, void *cookie);
 
+void	rw21a(iter_t iterations, void *cookie);
+void	rw31a(iter_t iterations, void *cookie);
+void	rw41a(iter_t iterations, void *cookie);
+void	rw51a(iter_t iterations, void *cookie);
+void	rw61a(iter_t iterations, void *cookie);
+
 void	init_overhead(iter_t iterations, void *cookie);
 void	init_loop(iter_t iterations, void *cookie);
 void	cleanup(iter_t iterations, void *cookie);
@@ -105,6 +111,21 @@ main(int ac, char **av)
 			warmup, repetitions, &state);
 	} else if (streq(av[optind+1], "rw61")) {
 		benchmp(init_loop, rw61, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rw21a")) {
+		benchmp(init_loop, rw21a, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rw31a")) {
+		benchmp(init_loop, rw31a, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rw41a")) {
+		benchmp(init_loop, rw41a, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rw51a")) {
+		benchmp(init_loop, rw51a, cleanup, 0, parallel,
+			warmup, repetitions, &state);
+	} else if (streq(av[optind+1], "rw61a")) {
+		benchmp(init_loop, rw61a, cleanup, 0, parallel,
 			warmup, repetitions, &state);
 	} else {
 		lmbench_usage(ac, av, usage);
@@ -299,3 +320,232 @@ void adjusted_bandwidth(uint64 time, uint64 bytes, uint64 iter, double overhd)
 		(void) fprintf(ftiming, "%.2f\n", mb/secs);
 	}
 }
+
+#define DOITD_2(START, STEP)					\
+	DOIT(START) DOIT(START + STEP)
+#define DOITD_5(START, STEP)					\
+	DOIT(START) DOIT(START + STEP) DOIT(START + 2*STEP)	\
+	DOIT(START + 3*STEP) DOIT(START + 4*STEP)
+#define DOITD_10(START, STEP)					\
+	DOITD_5(START, STEP) DOITD_5(START + 5*STEP, STEP)
+#define DOITD_20(START, STEP)					\
+	DOITD_10(START, STEP) DOITD_10(START + 10*STEP, STEP)
+
+void
+rw21a(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+#define DOIT2(off, off1)				\
+		    "movq " #off "(%0), %%rax\n\t"	\
+		    "movq $1, " #off1 "(%0)\n\t"
+#define DOIT(off) DOIT2(off, (off+64))
+		    asm volatile(
+			    DOITD_20(0, 128)
+			    DOITD_10(2560, 128)
+			    :
+			    : "r" (p)
+			    : "rax", "memory");
+#elif defined(__aarch64__)
+#define DOIT2(off, off1)				\
+		    "ldr x0, [%0, #" #off "]\n\t"	\
+		    "str x1, [%0, #" #off1 "]\n\t"
+#define DOIT(off) DOIT2(off, (off+64))
+		    asm volatile(
+			    "movz x1, #1\n\t"
+			    DOITD_20(0, 128)
+			    DOITD_10(2560, 128)
+			    :
+			    : "r" (p)
+			    : "x0", "x1", "memory");
+#endif
+		    p += 480;
+	    }
+	}
+}
+#undef	DOIT2
+#undef	DOIT
+
+void
+rw31a(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+#define DOIT3(off, off1, off2)				\
+		    "movq " #off "(%0), %%rax\n\t"	\
+		    "movq " #off1 "(%0), %%rax\n\t"	\
+		    "movq $1, " #off2 "(%0)\n\t"
+#define DOIT(off) DOIT3(off, (off+64), (off+128))
+		    asm volatile(
+			    DOITD_10(0, 192)
+			    DOITD_10(1920, 192)
+			    :
+			    : "r" (p)
+			    : "rax", "memory");
+#elif defined(__aarch64__)
+#define DOIT3(off, off1, off2)				\
+		    "ldr x0, [%0, #" #off "]\n\t"	\
+		    "ldr x0, [%0, #" #off1 "]\n\t"	\
+		    "str x1, [%0, #" #off2 "]\n\t"
+#define DOIT(off) DOIT3(off, (off+64), (off+128))
+		    asm volatile(
+			    "movz x1, #1\n\t"
+			    DOITD_10(0, 192)
+			    DOITD_10(1920, 192)
+			    :
+			    : "r" (p)
+			    : "x0", "x1", "memory");
+#endif
+		    p += 480;
+	    }
+	}
+}
+#undef	DOIT3
+#undef	DOIT
+
+void
+rw41a(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+#define DOIT4(off, off1, off2, off3)			\
+		    "movq " #off "(%0), %%rax\n\t"	\
+		    "movq " #off1 "(%0), %%rax\n\t"	\
+		    "movq " #off2 "(%0), %%rax\n\t"	\
+		    "movq $1, " #off3 "(%0)\n\t"
+#define DOIT(off) DOIT4(off, (off+64), (off+128), (off+192))
+		    asm volatile(
+			    DOITD_10(0, 256)
+			    DOITD_5(2560, 256)
+			    :
+			    : "r" (p)
+			    : "rax", "memory");
+#elif defined(__aarch64__)
+#define DOIT4(off, off1, off2, off3)			\
+		    "ldr x0, [%0, #" #off "]\n\t"	\
+		    "ldr x0, [%0, #" #off1 "]\n\t"	\
+		    "ldr x0, [%0, #" #off2 "]\n\t"	\
+		    "str x1, [%0, #" #off3 "]\n\t"
+#define DOIT(off) DOIT4(off, (off+64), (off+128), (off+192))
+		    asm volatile(
+			    "movz x1, #1\n\t"
+			    DOITD_10(0, 256)
+			    DOITD_5(2560, 256)
+			    :
+			    : "r" (p)
+			    : "x0", "x1", "memory");
+#endif
+		    p += 480;
+	    }
+	}
+}
+#undef	DOIT4
+#undef	DOIT
+
+void
+rw51a(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+#define DOIT5(off, off1, off2, off3, off4)		\
+		    "movq " #off "(%0), %%rax\n\t"	\
+		    "movq " #off1 "(%0), %%rax\n\t"	\
+		    "movq " #off2 "(%0), %%rax\n\t"	\
+		    "movq " #off3 "(%0), %%rax\n\t"	\
+		    "movq $1, " #off4 "(%0)\n\t"
+#define DOIT(off) DOIT5(off, (off+64), (off+128), (off+192), (off+256))
+		    asm volatile(
+			    DOITD_10(0, 320)
+			    DOITD_2(3200, 320)
+			    :
+			    : "r" (p)
+			    : "rax", "memory");
+#elif defined(__aarch64__)
+#define DOIT5(off, off1, off2, off3, off4)		\
+		    "ldr x0, [%0, #" #off "]\n\t"	\
+		    "ldr x0, [%0, #" #off1 "]\n\t"	\
+		    "ldr x0, [%0, #" #off2 "]\n\t"	\
+		    "ldr x0, [%0, #" #off3 "]\n\t"	\
+		    "str x1, [%0, #" #off4 "]\n\t"
+#define DOIT(off) DOIT5(off, (off+64), (off+128), (off+192), (off+256))
+		    asm volatile(
+			    "movz x1, #1\n\t"
+			    DOITD_10(0, 320)
+			    DOITD_2(3200, 320)
+			    :
+			    : "r" (p)
+			    : "x0", "x1", "memory");
+#endif
+		    p += 480;
+	    }
+	}
+}
+#undef	DOIT5
+#undef	DOIT
+
+void
+rw61a(iter_t iterations, void *cookie)
+{
+	state_t *state = (state_t *) cookie;
+	register TYPE *lastone = state->lastone;
+
+	while (iterations-- > 0) {
+	    register TYPE *p = state->buf;
+	    while (p <= lastone) {
+#if defined(__x86_64)
+#define DOIT6(off, off1, off2, off3, off4, off5)	\
+		    "movq " #off "(%0), %%rax\n\t"	\
+		    "movq " #off1 "(%0), %%rax\n\t"	\
+		    "movq " #off2 "(%0), %%rax\n\t"	\
+		    "movq " #off3 "(%0), %%rax\n\t"	\
+		    "movq " #off4 "(%0), %%rax\n\t"	\
+		    "movq $1, " #off5 "(%0)\n\t"
+#define DOIT(off) DOIT6(off, (off+64), (off+128), (off+192), (off+256), (off+320))
+		    asm volatile(
+			    DOITD_10(0, 384)
+			    :
+			    : "r" (p)
+			    : "rax", "memory");
+#elif defined(__aarch64__)
+#define DOIT6(off, off1, off2, off3, off4, off5)	\
+		    "ldr x0, [%0, #" #off "]\n\t"	\
+		    "ldr x0, [%0, #" #off1 "]\n\t"	\
+		    "ldr x0, [%0, #" #off2 "]\n\t"	\
+		    "ldr x0, [%0, #" #off3 "]\n\t"	\
+		    "ldr x0, [%0, #" #off4 "]\n\t"	\
+		    "str x1, [%0, #" #off5 "]\n\t"
+#define DOIT(off) DOIT6(off, (off+64), (off+128), (off+192), (off+256), (off+320))
+		    asm volatile(
+			    "movz x1, #1\n\t"
+			    DOITD_10(0, 384)
+			    :
+			    : "r" (p)
+			    : "x0", "x1", "memory");
+#endif
+		    p += 480;
+	    }
+	}
+}
+#undef	DOIT6
+#undef	DOIT
+
