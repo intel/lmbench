@@ -75,7 +75,7 @@ SRCS =  bw_file_rd.c bw_mem.c bw_mem64.c bw_mmap_rd.c bw_pipe.c		\
 	line.c lmdd.c lmhttp.c par_mem.c par_ops.c loop_o.c memsize.c 	\
 	mhz.c msleep.c rhttp.c seek.c timing_o.c tlb.c stream.c		\
 	bench.h lib_debug.h lib_tcp.h lib_udp.h lib_unix.h names.h 	\
-	stats.h timing.h version.h lat_mem_pingpong.c
+	stats.h timing.h version.h lat_mem_pingpong.c bw_mem64p.c
 
 ASMS =  $O/bw_file_rd.s $O/bw_mem.s $O/bw_mem64.s $O/bw_mmap_rd.s	\
 	$O/bw_pipe.s $O/bw_tcp.s $O/bw_udp.s $O/bw_unix.s $O/clock.s	\
@@ -92,7 +92,8 @@ ASMS =  $O/bw_file_rd.s $O/bw_mem.s $O/bw_mem64.s $O/bw_mmap_rd.s	\
 	$O/par_ops.s $O/loop_o.s $O/memsize.s $O/mhz.s $O/msleep.s	\
 	$O/rhttp.s $O/timing_o.s $O/tlb.s $O/stream.s			\
 	$O/cache.s $O/lat_dram_page.s $O/lat_pmake.s $O/lat_rand.s	\
-	$O/lat_usleep.s $O/lat_cmd.s $O/lat_mem_pingpong.s
+	$O/lat_usleep.s $O/lat_cmd.s $O/lat_mem_pingpong.s		\
+	$O/bw_mem64p.s
 EXES =	$O/bw_file_rd $O/bw_mem $O/bw_mem64 $O/bw_mmap_rd		\
 	$O/bw_pipe $O/bw_tcp $O/bw_unix $O/hello			\
 	$O/lat_select $O/lat_pipe $O/lat_rpc $O/lat_syscall $O/lat_tcp	\
@@ -103,7 +104,7 @@ EXES =	$O/bw_file_rd $O/bw_mem $O/bw_mem64 $O/bw_mmap_rd		\
 	$O/msleep $O/loop_o $O/lat_fifo $O/lmhttp $O/lat_http		\
 	$O/lat_fcntl $O/disk $O/lat_unix_connect $O/flushdisk		\
 	$O/lat_ops $O/line $O/tlb $O/par_mem $O/par_ops 		\
-	$O/stream $O/lat_mem_pingpong
+	$O/stream $O/lat_mem_pingpong $O/bw_mem64p
 OPT_EXES=$O/cache $O/lat_dram_page $O/lat_pmake $O/lat_rand 		\
 	$O/lat_usleep $O/lat_cmd
 LIBOBJS= $O/lib_tcp.o $O/lib_udp.o $O/lib_unix.o $O/lib_timing.o 	\
@@ -284,6 +285,10 @@ $O/bw_mem:  bw_mem.c timing.h stats.h bench.h $O/lmbench.a
 $O/bw_mem64.s:bw_mem64.c timing.h stats.h bench.h
 $O/bw_mem64:  bw_mem64.c timing.h stats.h bench.h $O/lmbench.a
 	$(COMPILE) -o $O/bw_mem64 bw_mem64.c $O/lmbench.a $(LDLIBS)
+
+$O/bw_mem64p.s:bw_mem64p.c timing.h stats.h bench.h
+$O/bw_mem64p:  bw_mem64p.c timing.h stats.h bench.h $O/lmbench.a
+	$(COMPILE) -o $O/bw_mem64p bw_mem64p.c $O/lmbench.a $(LDLIBS)
 
 $O/bw_mmap_rd.s:bw_mmap_rd.c timing.h stats.h bench.h
 $O/bw_mmap_rd:  bw_mmap_rd.c timing.h stats.h bench.h $O/lmbench.a
