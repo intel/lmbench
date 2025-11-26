@@ -162,9 +162,9 @@ __benchmp(benchmp_f initialize,
 	int warmup,
 	int repetitions,
 	int calibrate,
+	iter_t iterations,
 	void* cookie)
 {
-	iter_t		iterations = 1;
 	double		result = 0.;
 	double		usecs;
 	long		i, j;
@@ -189,10 +189,10 @@ __benchmp(benchmp_f initialize,
 	settime(0);
 	save_n(1);
 
-	if (!calibrate) {
+	if (!calibrate && iterations <= 1) {
 		/* Compute the baseline performance */
 		__benchmp(initialize, benchmark, cleanup,
-			enough, 1, warmup, repetitions, 1, cookie);
+			enough, 1, warmup, repetitions, 1, 1, cookie);
 
 		/* if we can't even do a single job, then give up */
 		if (gettime() == 0)
@@ -205,6 +205,8 @@ __benchmp(benchmp_f initialize,
 			tmp /= (double)gettime();
 			iterations = (iter_t)tmp + 1;
 		}
+		if (getenv("SHOW_ITERATIONS"))
+			fprintf(stderr, "iterations: %d\n", iterations);
 		settime(0);
 		save_n(1);
 	}
@@ -339,8 +341,12 @@ benchmp(benchmp_f initialize,
 	int repetitions,
 	void* cookie)
 {
+	iter_t iterations = 1;
+
+	if (getenv("ITERATIONS"))
+		iterations = atof(getenv("ITERATIONS"));
 	__benchmp(initialize, benchmark, cleanup, enough, parallel, warmup,
-		  repetitions, 0, cookie);
+		  repetitions, 0, iterations, cookie);
 }
 
 void
