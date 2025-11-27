@@ -35,9 +35,11 @@ main(int ac, char **av)
         size_t	len;
 	size_t	range;
 	size_t	stride;
-	char   *usage = "[-P <parallelism>] [-W <warmup>] [-N <repetitions>] [-t] len [stride...]\n";
+	size_t	lower = LOWER;
+	size_t	end = 0;
+	char   *usage = "[-P <parallelism>] [-W <warmup>] [-N <repetitions>] [-s <start>] [-e <end>] [-t] len [stride...]\n";
 
-	while (( c = getopt(ac, av, "tP:W:N:")) != EOF) {
+	while (( c = getopt(ac, av, "tP:W:N:s:e:")) != EOF) {
 		switch(c) {
 		case 't':
 			fpInit = thrash_initialize;
@@ -52,6 +54,12 @@ main(int ac, char **av)
 		case 'N':
 			repetitions = atoi(optarg);
 			break;
+		case 's':
+			lower = atoi(optarg);
+			break;
+		case 'e':
+			end = atoi(optarg);
+			break;
 		default:
 			lmbench_usage(ac, av, usage);
 			break;
@@ -63,10 +71,11 @@ main(int ac, char **av)
 
         len = atoi(av[optind]);
 	len *= 1024 * 1024;
+	end = end ? : len;
 
 	if (optind == ac - 1) {
 		fprintf(stderr, "\"stride=%d\n", STRIDE);
-		for (range = LOWER; range <= len; range = step(range)) {
+		for (range = lower; range <= end; range = step(range)) {
 			loads(len, range, STRIDE, parallel, 
 			      warmup, repetitions);
 		}
@@ -74,7 +83,7 @@ main(int ac, char **av)
 		for (i = optind + 1; i < ac; ++i) {
 			stride = bytes(av[i]);
 			fprintf(stderr, "\"stride=%d\n", stride);
-			for (range = LOWER; range <= len; range = step(range)) {
+			for (range = lower; range <= end; range = step(range)) {
 				loads(len, range, stride, parallel, 
 				      warmup, repetitions);
 			}
