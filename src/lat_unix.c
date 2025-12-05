@@ -71,7 +71,7 @@ void
 initialize(iter_t iterations, void* cookie)
 {
 	struct _state* pState = (struct _state*)cookie;
-	void	exit();
+	void	exit(int);
 
 	if (iterations) return;
 
