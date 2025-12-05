@@ -99,7 +99,7 @@ bench_pselect(iter_t iterations, void *cookie)
 #endif /* _POSIX_SELECT */
 
 void
-interval()
+interval(int)
 {
     if (++caught == n) {
 	caught = 0;
