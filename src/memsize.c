@@ -151,7 +151,7 @@ test_malloc(size_t size)
 }
 
 void
-gotalarm()
+gotalarm(int)
 {
 	alarm_triggered = 1;
 }
