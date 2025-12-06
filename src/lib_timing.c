@@ -580,6 +580,12 @@ benchmp_childid()
 	return _benchmp_child_state.childid;
 }
 
+int
+benchmp_parallel()
+{
+	return _benchmp_child_state.parallel;
+}
+
 void
 benchmp_child_sigchld(int signo)
 {

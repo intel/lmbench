@@ -310,6 +310,8 @@ extern iter_t benchmp_interval(void* _state);
  */
 extern int benchmp_childid();
 
+extern int benchmp_parallel();
+
 /*
  * harvest dead children to prevent zombies
  */
