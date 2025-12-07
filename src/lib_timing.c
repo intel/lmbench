@@ -586,6 +586,12 @@ benchmp_parallel()
 	return _benchmp_child_state.parallel;
 }
 
+int
+benchmp_timing()
+{
+	return _benchmp_child_state.state == timing_interval;
+}
+
 void
 benchmp_child_sigchld(int signo)
 {

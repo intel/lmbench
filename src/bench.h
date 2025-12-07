@@ -312,6 +312,9 @@ extern int benchmp_childid();
 
 extern int benchmp_parallel();
 
+/* Not warmup, or cooldown, etc. */
+extern int benchmp_timing();
+
 /*
  * harvest dead children to prevent zombies
  */
