@@ -296,6 +296,17 @@ extern void benchmp(benchmp_f initialize,
 		    void* cookie
 	);
 
+extern void __benchmp(benchmp_f initialize,
+		      benchmp_f benchmark,
+		      benchmp_f cleanup,
+		      int enough,
+		      int parallel,
+		      int warmup,
+		      int repetitions,
+		      int calibrate,
+		      iter_t iterations,
+		      void* cookie);
+
 /* 
  * These are used by weird benchmarks which cannot return, such as page
  * protection fault handling.  See lat_sig.c for sample usage.

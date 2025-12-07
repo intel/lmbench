@@ -153,7 +153,7 @@ benchmp_parent(int response,
 int
 sizeof_result(int repetitions);
 
-static void
+void
 __benchmp(benchmp_f initialize,
 	benchmp_f benchmark,
 	benchmp_f cleanup,
