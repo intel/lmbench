@@ -331,6 +331,18 @@ cleanup_exit:
 #endif
 }
 
+iter_t get_iterations_setup(void)
+{
+	iter_t iterations = 0;
+	char *siterations;
+
+	siterations = getenv("ITERATIONS");
+	if (siterations)
+		iterations = atoi(siterations);
+
+	return iterations;
+}
+
 void
 benchmp(benchmp_f initialize,
 	benchmp_f benchmark,
@@ -341,10 +353,11 @@ benchmp(benchmp_f initialize,
 	int repetitions,
 	void* cookie)
 {
-	iter_t iterations = 1;
+	iter_t iterations;
 
-	if (getenv("ITERATIONS"))
-		iterations = atof(getenv("ITERATIONS"));
+	iterations = get_iterations_setup();
+	if (!iterations)
+		iterations = 1;
 	__benchmp(initialize, benchmark, cleanup, enough, parallel, warmup,
 		  repetitions, 0, iterations, cookie);
 }

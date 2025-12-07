@@ -307,6 +307,8 @@ extern void __benchmp(benchmp_f initialize,
 		      iter_t iterations,
 		      void* cookie);
 
+iter_t get_iterations_setup(void);
+
 /* 
  * These are used by weird benchmarks which cannot return, such as page
  * protection fault handling.  See lat_sig.c for sample usage.
