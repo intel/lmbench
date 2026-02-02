@@ -172,6 +172,14 @@ typedef struct {
 	int	N;
 	value_t	v[TRIES];
 } result_t;
+
+typedef struct {
+	uint64 time;
+	uint64 n;
+	double avg_time_per_iter;
+	double stddev;
+} stats_t;
+
 int	sizeof_result(int N);
 void    insertinit(result_t *r);
 void    insertsort(uint64, uint64, result_t *);
@@ -182,6 +190,9 @@ void	set_results(result_t *r);
 result_t* get_results();
 double  get_avg_time_per_iter();
 double  get_stddev_percent();
+void    record_stats(stats_t *stats);
+void    set_child_stats(stats_t *stats);
+stats_t* get_child_stats();
 
 #define	BENCHO(loop_body, overhead_body, enough) { 			\
 	int 		__i, __N;					\

@@ -35,6 +35,7 @@ static		uint64	iterations;
 static		void	init_timing(void);
 static		double	avg_time_per_iter;
 static		double	stddev;
+static		stats_t*	child_stats = NULL;
 
 #if defined(hpux) || defined(__hpux)
 #include <sys/mman.h>
@@ -360,6 +361,7 @@ benchmp_parent(	int response,
 	result_t*	results = NULL;
 	result_t*	merged_results = NULL;
 	char*		signals = NULL;
+	stats_t*	child_stats = NULL;
 	unsigned char*	buf;
 	fd_set		fds_read, fds_error;
 	struct timeval	timeout;
@@ -374,7 +376,8 @@ benchmp_parent(	int response,
 	results = (result_t*)malloc(sizeof_result(repetitions));
 	merged_results = (result_t*)malloc(sizeof_result(parallel * repetitions));
 	signals = (char*)malloc(parallel * sizeof(char));
-	if (!results || !merged_results || !signals) return;
+	child_stats = (stats_t*)malloc(parallel * sizeof(stats_t));
+	if (!results || !merged_results || !signals || !child_stats) return;
 
 	/* Collect 'ready' signals */
 	for (i = 0; i < parallel * sizeof(char); i += bytes_read) {
@@ -495,6 +498,10 @@ benchmp_parent(	int response,
 				goto error_exit;
 			}
 		}
+
+		set_results(results);
+		record_stats(&child_stats[i]);
+
 		for (j = 0; j < results->N; ++j) {
 			insertsort(results->v[j].u, 
 				   results->v[j].n, merged_results);
@@ -503,12 +510,13 @@ benchmp_parent(	int response,
 
 	/* we allow children to die now, without it causing an error */
 	signal(SIGCHLD, SIG_DFL);
-	
+
 	/* send 'exit' signals */
 	write(exit_signal, results, parallel * sizeof(char));
 
 	/* Compute median time; iterations is constant! */
 	set_results(merged_results);
+	set_child_stats(child_stats);
 
 	goto cleanup_exit;
 error_exit:
@@ -521,6 +529,7 @@ error_exit:
 		waitpid(pids[i], NULL, 0);
 	}
 	free(merged_results);
+	free(child_stats);
 cleanup_exit:
 	close(response);
 	close(start_signal);
@@ -1365,6 +1374,29 @@ get_stddev_percent()
 		return (stddev / avg_time_per_iter) * 100.0;
 	}
 	return 0.0;
+}
+
+void
+record_stats(stats_t *stats)
+{
+	if (stats) {
+		stats->time = gettime();
+		stats->n = get_n();
+		stats->avg_time_per_iter = get_avg_time_per_iter();
+		stats->stddev = get_stddev_percent();
+	}
+}
+
+void
+set_child_stats(stats_t *stats)
+{
+	child_stats = stats;
+}
+
+stats_t*
+get_child_stats()
+{
+	return child_stats;
 }
 
 /*

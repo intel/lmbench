@@ -55,6 +55,7 @@ typedef struct _state {
 } state_t;
 
 void	adjusted_bandwidth(uint64 t, uint64 b, uint64 iter, int parallel, double ovrhd, double avg_time_per_iter, double stddev_pct, int verbose);
+void	print_child_bandwidth(uint64 bytes, int parallel, double overhd);
 
 int
 main(int ac, char **av)
@@ -141,6 +142,9 @@ main(int ac, char **av)
 	}
 	adjusted_bandwidth(gettime(), nbytes, get_n(), parallel, state.overhead,
 			   get_avg_time_per_iter(), get_stddev_percent(), verbose);
+	if (verbose) {
+		print_child_bandwidth(nbytes, parallel, state.overhead);
+	}
 	return(0);
 }
 
@@ -480,3 +484,21 @@ void adjusted_bandwidth(uint64 time, uint64 bytes, uint64 iter, int parallel, do
 	(void) fprintf(ftiming, "\n");
 }
 
+void print_child_bandwidth(uint64 bytes, int parallel, double overhd)
+{
+	extern FILE *ftiming;
+	stats_t *child_stats = get_child_stats();
+	int i;
+
+	if (!child_stats)
+		return;
+
+	if (!ftiming) ftiming = stderr;
+
+	for (i = 0; i < parallel; ++i) {
+		stats_t *stat = &child_stats[i];
+		(void) fprintf(ftiming, "child %d: ", i);
+		adjusted_bandwidth(stat->time, bytes, stat->n, 1, overhd,
+				   stat->avg_time_per_iter, stat->stddev, 1);
+	}
+}
