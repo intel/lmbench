@@ -33,6 +33,8 @@ FILE			*ftiming;
 static volatile uint64	use_result_dummy;
 static		uint64	iterations;
 static		void	init_timing(void);
+static		double	avg_time_per_iter;
+static		double	stddev;
 
 #if defined(hpux) || defined(__hpux)
 #include <sys/mman.h>
@@ -1263,6 +1265,7 @@ insertsort(uint64 u, uint64 n, result_t *r)
 	}
 	r->v[i].u = u;
 	r->v[i].n = n;
+	r->v[i].udn = u/(double)n;
 	r->N++;
 }
 
@@ -1280,6 +1283,7 @@ set_results(result_t *r)
 {
 	results = r;
 	save_median();
+	save_avg_stddev();
 }
 
 void
@@ -1314,6 +1318,53 @@ save_median()
 	fprintf(stderr, "save_median: N=%d, n=%lu, u=%lu\n", results->N, (unsigned long)n, (unsigned long)u);
 #endif /* _DEBUG */
 	save_n(n); settime(u);
+}
+
+void
+save_avg_stddev()
+{
+	int	i;
+	double	sum = 0.0;
+	double	sum_sq = 0.0;
+	double	variance;
+
+	if (results->N == 0) {
+		avg_time_per_iter = 0.0;
+		stddev = 0.0;
+	} else {
+		/* Calculate average */
+		for (i = 0; i < results->N; ++i) {
+			sum += results->v[i].udn;
+		}
+		avg_time_per_iter = sum / results->N;
+
+		/* Calculate standard deviation */
+		for (i = 0; i < results->N; ++i) {
+			double diff = results->v[i].udn - avg_time_per_iter;
+			sum_sq += diff * diff;
+		}
+		variance = sum_sq / results->N;
+		stddev = sqrt(variance);
+	}
+#ifdef _DEBUG
+	fprintf(stderr, "save_avg_stddev: N=%d, avg=%.2f, stddev=%.2f, stddev%%=%.2f%%\n", 
+		results->N, avg_time_per_iter, stddev, (avg_time_per_iter > 0 ? (stddev / avg_time_per_iter * 100.0) : 0.0));
+#endif /* _DEBUG */
+}
+
+double
+get_avg_time_per_iter()
+{
+	return avg_time_per_iter;
+}
+
+double
+get_stddev_percent()
+{
+	if (avg_time_per_iter > 0.0) {
+		return (stddev / avg_time_per_iter) * 100.0;
+	}
+	return 0.0;
 }
 
 /*

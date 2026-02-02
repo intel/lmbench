@@ -54,7 +54,7 @@ typedef struct _state {
 	size_t	N;
 } state_t;
 
-void	adjusted_bandwidth(uint64 t, uint64 b, uint64 iter, double ovrhd);
+void	adjusted_bandwidth(uint64 t, uint64 b, uint64 iter, int parallel, double ovrhd, double avg_time_per_iter, double stddev_pct, int verbose);
 
 int
 main(int ac, char **av)
@@ -62,14 +62,15 @@ main(int ac, char **av)
 	int	parallel = 1;
 	int	warmup = 0;
 	int	repetitions = TRIES;
+	int	verbose = 0;
 	size_t	nbytes;
 	state_t	state;
 	int	c;
-	char	*usage = "[-P <parallelism>] [-W <warmup>] [-N <repetitions>] <size> what [conflict]\nwhat: rd wr rdwr cp fwr frd fcp bzero bcopy\n<size> must be larger than 512";
+	char	*usage = "[-P <parallelism>] [-W <warmup>] [-N <repetitions>] [-v] <size> what [conflict]\nwhat: rd wr rdwr cp fwr frd fcp bzero bcopy\n<size> must be larger than 512";
 
 	state.overhead = 0;
 
-	while (( c = getopt(ac, av, "P:W:N:")) != EOF) {
+	while (( c = getopt(ac, av, "P:W:N:v")) != EOF) {
 		switch(c) {
 		case 'P':
 			parallel = atoi(optarg);
@@ -80,6 +81,9 @@ main(int ac, char **av)
 			break;
 		case 'N':
 			repetitions = atoi(optarg);
+			break;
+		case 'v':
+			verbose = 1;
 			break;
 		default:
 			lmbench_usage(ac, av, usage);
@@ -135,8 +139,8 @@ main(int ac, char **av)
 	} else {
 		lmbench_usage(ac, av, usage);
 	}
-	adjusted_bandwidth(gettime(), nbytes, 
-			   get_n() * parallel, state.overhead);
+	adjusted_bandwidth(gettime(), nbytes, get_n(), parallel, state.overhead,
+			   get_avg_time_per_iter(), get_stddev_percent(), verbose);
 	return(0);
 }
 
@@ -440,12 +444,14 @@ loop_bcopy(iter_t iterations, void *cookie)
  * Almost like bandwidth() in lib_timing.c, but we need to adjust
  * bandwidth based upon loop overhead.
  */
-void adjusted_bandwidth(uint64 time, uint64 bytes, uint64 iter, double overhd)
+void adjusted_bandwidth(uint64 time, uint64 bytes, uint64 iter, int parallel, double overhd, double avg_time_per_iter, double stddev_pct, int verbose)
 {
 #define MB	(1000. * 1000.)
 	extern FILE *ftiming;
+	iter = iter * parallel;
 	double secs = ((double)time / (double)iter - overhd) / 1000000.0;
 	double mb;
+	double avg_secs = (avg_time_per_iter / parallel - overhd) / 1000000.0;
 	
         mb = bytes / MB;
 
@@ -459,10 +465,18 @@ void adjusted_bandwidth(uint64 time, uint64 bytes, uint64 iter, double overhd)
 		(void) fprintf(ftiming, "%.2f ", mb);
 	}
 	if (mb / secs < 1.) {
-		(void) fprintf(ftiming, "%.6f\n", mb/secs);
+		(void) fprintf(ftiming, "%.6f", mb/secs);
 	} else {
-		(void) fprintf(ftiming, "%.2f\n", mb/secs);
+		(void) fprintf(ftiming, "%.2f", mb/secs);
 	}
+	if (verbose) {
+		if (mb / avg_secs < 1.) {
+			(void) fprintf(ftiming, " %.6f", mb/avg_secs);
+		} else {
+			(void) fprintf(ftiming, " %.2f", mb/avg_secs);
+		}
+		(void) fprintf(ftiming, " time_per_iter_stddev=%.2f%%", stddev_pct);
+	}
+	(void) fprintf(ftiming, "\n");
 }
-
 

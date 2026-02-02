@@ -165,6 +165,7 @@ int	gettimeofday(struct timeval *tv, struct timezone *tz);
 typedef struct {
 	uint64 u;
 	uint64 n;
+	double udn;
 } value_t;
 
 typedef struct {
@@ -176,9 +177,11 @@ void    insertinit(result_t *r);
 void    insertsort(uint64, uint64, result_t *);
 void	save_median();
 void	save_minimum();
+void    save_avg_stddev();
 void	set_results(result_t *r);
 result_t* get_results();
-
+double  get_avg_time_per_iter();
+double  get_stddev_percent();
 
 #define	BENCHO(loop_body, overhead_body, enough) { 			\
 	int 		__i, __N;					\
