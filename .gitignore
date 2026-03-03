@@ -2,3 +2,5 @@ GPATH
 GRTAGS
 GTAGS
 
+*.ver
+.vscode/

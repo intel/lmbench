@@ -84,23 +84,5 @@ install: $(MAN)
 		done; \
 	done
 
-get: $(ALL)
-
-edit:
-	get -e -s $(ALL)
-
-$(MAN):
-	get -s $(MAN)
-
-$(PIC):
-	get -s $(PIC)
-
-$(DESC):
-	get -s $(DESC)
-
-$(USENIX):
-	get -s $(USENIX)
-
 clean:
-	-bk clean 
 	/bin/rm -f *.PS XXX bw.pic memrd_bcopy_comp.pic references.i

@@ -11,7 +11,6 @@
 # doc.lpr	print the documentation
 # doc.x		preview the documentation (needs X, groff, pic, etc)
 # clean		go to the subdirs and $(MAKE) clean
-# get		$(MAKE) sure all files are checked out
 # shar		build a shippable shar archive
 
 SHELL=/bin/sh
@@ -35,22 +34,14 @@ doc.x:
 	cd doc && $(MAKE) x
 
 clobber clean: 
-	for i in doc src results scripts; do \
+	for i in doc src results; do \
 		echo ===== $$i =====; \
 		(cd $$i && $(MAKE) clean); \
 	done
 	/bin/rm -rf bin/*
-	-bk clean 
-
-get: 
-	for i in doc src results scripts; do \
-		echo ===== $$i =====; \
-		(cd $$i && bk get -q); \
-	done
-	@co -q
 
 info: 
-	for i in doc src results scripts; do \
+	for i in doc src results; do \
 		echo ===== $$i =====; \
 		(cd $$i && info); \
 	done
@@ -58,16 +49,11 @@ info:
 release: scripts/mkrelease
 	scripts/mkrelease
 
-scripts/mkrelease:
-	cd scripts && co mkrelease
-
 # XXX - . must be named lmbench for this to work
 shar:
 	$(MAKE) clean
-	co -q Makefile
-	$(MAKE) get
 	cd .. && \
-	find lmbench -type f -print  | egrep -v 'noship|RCS' > /tmp/FILES
-	cd .. && shar -S -a -n lmbench1.0 -L 50K < /tmp/FILES 
+	find lmbench -type f -print | egrep -v 'noship|\.git' > /tmp/FILES
+	cd .. && shar -S -a -n lmbench1.0 -L 50K < /tmp/FILES
 
 FRC:

@@ -165,55 +165,41 @@ debug:
 assembler:
 	@env CFLAGS=-O MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build asm
 
-bk.ver: ../SCCS/s.ChangeSet
-	rm -f bk.ver
-	-echo `bk prs -hr+ -d'$$if(:SYMBOL:){:SYMBOL: }:UTC:' ../ChangeSet;` > bk.ver
-	touch bk.ver
+git.ver:
+	rm -f git.ver
+	@if git rev-parse --git-dir > /dev/null 2>&1; then \
+		git describe --tags --always --dirty 2>/dev/null > git.ver || echo "3.0-a9" > git.ver; \
+	else \
+		echo "3.0-a9" > git.ver; \
+	fi
 
-dist: bk.ver
-	@if [ "X`cd ..; bk sfiles -c`" != "X" ]; then \
+dist: git.ver
+	@cd ..; \
+	if ! git diff-index --quiet HEAD; then \
 		echo "modified files!"; \
 		false; \
-	 fi
-	@if [ "X`cd ..; bk pending`" != "X" ]; then \
-		echo "pending changes!"; \
-		false; \
-	 fi
+	fi
 	cd ..; \
 		SRCDIR=`pwd`; \
 		DIR=`basename $${SRCDIR}`; \
-		VERSION=`cat src/bk.ver| awk '{print $$1;}' | sed -e 's/Version-//g'`; \
+		VERSION=`cat src/git.ver`; \
 		cd ..; \
-		bk clone $${DIR} /tmp/lmbench-$${VERSION}; \
+		git clone $${DIR} /tmp/lmbench-$${VERSION}; \
 		cd /tmp/lmbench-$${VERSION}; \
-		bk sfiles | xargs touch; \
-		sleep 5; \
-		bk get -s; \
-		for d in doc results scripts src; do \
-			cd $$d; bk get -s; cd ..; \
-		done; \
-		bk sfiles -U -g | xargs touch; \
+		/bin/rm -rf .git; \
 		cd src; \
-		make bk.ver; \
+		make git.ver; \
 		cd /tmp; \
 		tar czf $${SRCDIR}/../lmbench-$${VERSION}.tgz \
 			lmbench-$${VERSION}; \
 		rm -rf /tmp/lmbench-$${VERSION};
 
-get $(SRCS):
-	-get -s $(SRCS)
-
-edit get-e:
-	get -e -s $(SRCS)
-
 clean:
 	/bin/rm -f ../bin/*/CONFIG ../bin/*/*.[oas]
 	/bin/rm -f *.[oas]
-	-bk clean
 
 clobber:
 	/bin/rm -rf ../bin* SHAR
-	-bk clean
 
 shar:
 	cd ../.. && shar lmbench/Results/Makefile $(SAMPLES) lmbench/scripts/* lmbench/src/Makefile lmbench/src/*.[ch] > lmbench/SHAR
@@ -225,12 +211,12 @@ testmake: $(SRCS) $(UTILS) # used by scripts/make to test gmake
 	@true
 
 .PHONY: lmbench results rerun hardware os install all Wall debug \
-	install install-target dist get edit get-e clean clobber \
-	share depend testmake
+	install install-target dist clean clobber shar \
+	depend testmake
 
-$O/lmbench : ../scripts/lmbench bk.ver
+$O/lmbench : ../scripts/lmbench git.ver
 	rm -f $O/lmbench
-	sed -e "s/<version>/`cat bk.ver`/g" < ../scripts/lmbench > $O/lmbench
+	sed -e "s/<version>/`cat git.ver`/g" < ../scripts/lmbench > $O/lmbench
 	chmod +x $O/lmbench
 
 $O/lmbench.a: $(LIBOBJS)
@@ -256,9 +242,6 @@ $O/lib_sched.o : lib_sched.c $(INCS)
 	$(COMPILE) -c lib_sched.c -o $O/lib_sched.o
 $O/getopt.o : getopt.c $(INCS)
 	$(COMPILE) -c getopt.c -o $O/getopt.o
-
-$(UTILS) :
-	-cd ../scripts; make get
 
 # Do not remove the next line, $(MAKE) depend needs it
 # MAKEDEPEND follows

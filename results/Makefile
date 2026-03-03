@@ -309,11 +309,8 @@ bw.8up: bargraphs.1st
 		echo .bp; \
 	done | sed '$$d' | $(PS8UP)
 
-get:	# nothing to do
-
 clean:
 	/bin/rm -f PS/* GIF/* HTML/* tmp/* summary.roff
-	-bk clean
 
 dirs:
 	@if [ ! -d tmp ]; then mkdir tmp; fi
