@@ -2,8 +2,8 @@
  * lat_mem_rd.c - measure memory load latency
  *
  * usage: lat_mem_rd [-P <parallelism>] [-W <warmup>] [-N <repetitions>]
- *                   [-s <start>] [-e <end>] [-t [-p <chase-page-size>]]
- *                   size-in-MB [stride ...]
+ *                   [-s <start>] [-e <end>] [-c <count-limit>]
+ *                   [-t [-p <chase-page-size>]] size-in-MB [stride ...]
  *
  * Copyright (c) 1994 Larry McVoy.  
  * Copyright (c) 2003, 2004 Carl Staelin.
@@ -19,9 +19,12 @@ char	*id = "$Id: s.lat_mem_rd.c 1.13 98/06/30 16:13:49-07:00 lm@lm.bitmover.com 
 #include "bench.h"
 #define STRIDE  (512/sizeof(char *))
 #define	LOWER	512
+#ifndef	MIN
+#define	MIN(a, b)	((a) < (b) ? (a) : (b))
+#endif
 void	loads(size_t len, size_t range, size_t stride, 
 	      int parallel, int warmup, int repetitions,
-	      size_t chase_pagesize);
+	      size_t chase_pagesize, size_t count_limit);
 size_t	step(size_t k);
 void	initialize(iter_t iterations, void* cookie);
 
@@ -64,9 +67,10 @@ main(int ac, char **av)
 	size_t	stride;
 	size_t	lower = LOWER;
 	size_t	end = 0;
-	char   *usage = "[-P <parallelism>] [-W <warmup>] [-N <repetitions>] [-s <start>] [-e <end>] [-t [-p <chase-page-size>]] len [stride...]\n";
+	size_t	count_limit = 0;
+	char   *usage = "[-P <parallelism>] [-W <warmup>] [-N <repetitions>] [-s <start>] [-e <end>] [-c <count-limit>] [-t [-p <chase-page-size>]] len [stride...]\n";
 
-	while (( c = getopt(ac, av, "tp:P:W:N:s:e:")) != EOF) {
+	while (( c = getopt(ac, av, "tp:P:W:N:s:e:c:")) != EOF) {
 		switch(c) {
 		case 't':
 			fpInit = thrash_initialize;
@@ -93,6 +97,12 @@ main(int ac, char **av)
 		case 'e':
 			end = atoi(optarg);
 			break;
+		case 'c':
+			char *endptr;
+			count_limit = (size_t)strtoul(optarg, &endptr, 10);
+			if (optarg[0] == '-' || *optarg == '\0' || *endptr != '\0' || errno == ERANGE)
+				lmbench_usage(ac, av, usage);
+			break;
 		default:
 			lmbench_usage(ac, av, usage);
 			break;
@@ -117,7 +127,7 @@ main(int ac, char **av)
 		fprintf(stderr, "\"stride=%d\n", STRIDE);
 		for (range = lower; range <= end; range = step(range)) {
 			loads(len, range, STRIDE, parallel, 
-			      warmup, repetitions, chase_pagesize);
+			      warmup, repetitions, chase_pagesize, count_limit);
 		}
 	} else {
 		for (i = optind + 1; i < ac; ++i) {
@@ -128,7 +138,7 @@ main(int ac, char **av)
 			fprintf(stderr, "\"stride=%d\n", stride);
 			for (range = lower; range <= end; range = step(range)) {
 				loads(len, range, stride, parallel, 
-				      warmup, repetitions, chase_pagesize);
+				      warmup, repetitions, chase_pagesize, count_limit);
 			}
 			fprintf(stderr, "\n");
 		}
@@ -149,7 +159,7 @@ benchmark_loads(iter_t iterations, void *cookie)
 	struct mem_state* state = (struct mem_state*)cookie;
 	register char **p = (char**)state->p[0];
 	register size_t i;
-	register size_t count = state->len / (state->line * 100) + 1;
+	register size_t count = state->count;
 
 	while (iterations-- > 0) {
 		for (i = 0; i < count; ++i) {
@@ -165,10 +175,10 @@ benchmark_loads(iter_t iterations, void *cookie)
 void
 loads(size_t len, size_t range, size_t stride, 
 	int parallel, int warmup, int repetitions,
-	size_t chase_pagesize)
+	size_t chase_pagesize, size_t count_limit)
 {
 	double result;
-	size_t count;
+	size_t default_count;
 	struct mem_state state;
 
 	if (range < stride) return;
@@ -183,7 +193,8 @@ loads(size_t len, size_t range, size_t stride,
 			exit(1);
 		state.pagesize = chase_pagesize;
 	}
-	count = 100 * (state.len / (state.line * 100) + 1);
+	default_count = (state.len / (state.line * 100) + 1);
+	state.count = count_limit ? MIN(count_limit, default_count) : default_count;
 
 #if 0
 	(*fpInit)(0, &state);
@@ -204,7 +215,7 @@ loads(size_t len, size_t range, size_t stride,
 
 	/* We want to get to nanoseconds / load. */
 	save_minimum();
-	result = (1000. * (double)gettime()) / (double)(count * get_n());
+	result = (1000. * (double)gettime()) / ((double)state.count * (double)get_n() * 100.);
 	fprintf(stderr, "%.5f %.3f\n", range / (1024. * 1024.), result);
 
 }

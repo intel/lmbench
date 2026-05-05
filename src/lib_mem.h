@@ -31,6 +31,7 @@ struct mem_state {
 	int	width;
 	size_t	len;
 	size_t	maxlen;
+	size_t	count;
 	size_t	line;
 	size_t	pagesize;
 	size_t	nlines;
