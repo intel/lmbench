@@ -166,6 +166,7 @@ cleanup(iter_t iterations, void* cookie)
 void
 timeout(int signum)
 {
+	(void)signum;
 	fprintf(stderr, "Recv timed out\n");
 	exit(1);
 }

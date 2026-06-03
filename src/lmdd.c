@@ -633,9 +633,10 @@ chkarg(char *arg)
 	/*NOTREACHED*/
 }
 
-void 
+void
 done(int signum)
 {
+	(void)signum;
 	int	i;
 	int	step;
 	int	size;

@@ -389,6 +389,7 @@ logit(int sock, char *name, int size)
 
 void die(int signum)
 {
+	(void)signum;
 	if (nbytes) {
 		write(logfile, logbuf, nbytes);
 		nbytes = 0;
