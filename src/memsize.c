@@ -151,7 +151,7 @@ test_malloc(size_t size)
 }
 
 void
-gotalarm(int)
+gotalarm(__attribute__((unused)) int unused)
 {
 	alarm_triggered = 1;
 }
