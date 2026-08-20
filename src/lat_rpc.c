@@ -105,6 +105,7 @@ main(int ac, char **av)
 	char	*usage = "-s\n OR [-p <tcp|udp>] [-P parallel] [-W <warmup>] [-N <repetitions>] serverhost\n OR -S serverhost\n";
 
 	state.msize = 1;
+	state.server = NULL;
 
 	while (( c = getopt(ac, av, "sS:m:p:P:W:N:")) != EOF) {
 		switch(c) {
