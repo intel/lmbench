@@ -77,23 +77,23 @@ foreach $file (@ARGV) {
 			@_ = split;
 			push(@integer_mod, $_[2]);
 		}
-		if (/^uint64 bit:/) {
+		if (/^int64 bit:/) {
 			@_ = split;
 			push(@int64_bit, $_[2]);
 		}
-		if (/^uint64 add:/) {
+		if (/^int64 add:/) {
 			@_ = split;
 			push(@int64_add, $_[2]);
 		}
-		if (/^uint64 mul:/) {
+		if (/^int64 mul:/) {
 			@_ = split;
 			push(@int64_mul, $_[2]);
 		}
-		if (/^uint64 div:/) {
+		if (/^int64 div:/) {
 			@_ = split;
 			push(@int64_div, $_[2]);
 		}
-		if (/^uint64 mod:/) {
+		if (/^int64 mod:/) {
 			@_ = split;
 			push(@int64_mod, $_[2]);
 		}
@@ -451,7 +451,7 @@ EOF
 &print_basic;
 &print_process;
 &print_int;
-&print_uint64;
+&print_int64;
 &print_float;
 &print_double;
 &print_ctx;
@@ -585,7 +585,7 @@ EOF
 	}
 }
 
-sub print_uint64
+sub print_int64
 {
 	local($i);
 	local($t);
@@ -597,7 +597,7 @@ sub print_uint64
 	}
 	print<<EOF;
 
-Basic uint64 operations - times in nanoseconds - smaller is better
+Basic int64 operations - times in nanoseconds - smaller is better
 ------------------------------------------------------------------
 Host                 OS int64  int64  int64  int64  int64  
                          bit    add    mul    div    mod   
