@@ -20,7 +20,7 @@ char	*id = "$Id$\n";
 
 uint64	caught, n;
 double	adj;
-void	handler(int) { }
+void	handler(__attribute__((unused)) int unused) { }
 jmp_buf	prot_env;
 
 void
@@ -69,7 +69,7 @@ struct _state {
 };
 
 void
-prot(int) {
+prot(__attribute__((unused)) int unused) {
 	if (++caught == n) {
 		caught = 0;
 		n = benchmp_interval(benchmp_getstate());
