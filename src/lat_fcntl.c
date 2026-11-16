@@ -102,8 +102,8 @@ initialize(iter_t iterations, void* cookie)
 
 	if (iterations) return;
 
-	sprintf(state->filename1, "/tmp/lmbench-fcntl%d.1", getpid());
-	sprintf(state->filename2, "/tmp/lmbench-fcntl%d.2", getpid());
+	sprintf(state->filename1, LMBENCH_TMPDIR "/lmbench-fcntl%d.1", getpid());
+	sprintf(state->filename2, LMBENCH_TMPDIR "/lmbench-fcntl%d.2", getpid());
 	state->pid = 0;
 	state->fd1 = -1;
 	state->fd2 = -1;

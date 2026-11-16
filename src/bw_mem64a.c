@@ -537,7 +537,7 @@ frd_sse(iter_t iterations, void *cookie)
 			DOIT_32(0, 16)
 			:
 			: "r" (p)
-			: "q0", "x1", "memory");
+			: "v0", "x1", "memory");
 #else
 #define	DOIT(i)	val = p[i];
 		DOIT_64(0, 1)
@@ -630,7 +630,7 @@ fwr_sse(iter_t iterations, void *cookie)
 			DOIT_32(0, 16)
 			:
 			: "r" (p)
-			: "q0", "x1", "memory");
+			: "v0", "x1", "memory");
 #else
 #define	DOIT(i)	p[i] = 1;
 		DOIT_64(0, 1)
@@ -720,7 +720,7 @@ frd_avx(iter_t iterations, void *cookie)
 			DOIT_16(0, 32)
 			:
 			: "r" (p)
-			: "q0", "q1", "memory");
+			: "v0", "v1", "memory");
 #else
 #define	DOIT(i)	val = p[i];
 		DOIT_64(0, 1)
@@ -758,7 +758,7 @@ fwr_avx(iter_t iterations, void *cookie)
 			DOIT_16(0, 32)
 			:
 			: "r" (p)
-			: "q0", "q1", "memory");
+			: "v0", "v1", "memory");
 #else
 #define	DOIT(i)	p[i] = 1;
 		DOIT_64(0, 1)

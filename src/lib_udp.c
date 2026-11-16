@@ -51,7 +51,9 @@ udp_server(u_long prog, int rdwr)
 void
 udp_done(int prog)
 {
+#ifndef	NO_PORTMAPPER
 	(void)pmap_unset((u_long)prog, (u_long)1);
+#endif
 }
 
 /*

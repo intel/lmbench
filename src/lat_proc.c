@@ -15,14 +15,22 @@ char	*id = "$Id$\n";
 
 #include "bench.h"
 
+#ifdef __ANDROID__
+#define SHELL_PATH "/system/bin/sh"
+#else
+#define SHELL_PATH "/bin/sh"
+#endif
 
 #ifdef STATIC
-#define	PROG "/tmp/hello-s"
+#define PROG_NAME "hello-s"
 #define STATIC_PREFIX "Static "
 #else
-#define	PROG "/tmp/hello"
+#define PROG_NAME "hello"
 #define STATIC_PREFIX ""
 #endif
+#define	PROG LMBENCH_TMPDIR "/" PROG_NAME
+
+static char *prog_path = PROG;
 
 void do_shell(iter_t iterations, void* cookie);
 void do_forkexec(iter_t iterations,void* cookie);
@@ -52,6 +60,18 @@ main(int ac, char **av)
 	int repetitions = TRIES;
 	int c;
 	char* usage = "[-P <parallelism>] [-W <warmup>] [-N <repetitions>] procedure|fork|exec|shell\n";
+	char *lmbench_dir;
+
+	lmbench_dir = getenv("LMBENCHDIR");
+	if (lmbench_dir) {
+		size_t len = strlen(lmbench_dir) + sizeof("/" PROG_NAME);
+		prog_path = malloc(len);
+		if (!prog_path) {
+			perror("malloc");
+			exit(1);
+		}
+		snprintf(prog_path, len, "%s/%s", lmbench_dir, PROG_NAME);
+	}
 
 	while (( c = getopt(ac, av, "P:W:N:")) != EOF) {
 		switch(c) {
@@ -111,7 +131,7 @@ do_shell(iter_t iterations, void* cookie)
 		case 0:	/* child */
 			handle_scheduler(benchmp_childid(), 1, 1);
 			close(1);
-			execlp("/bin/sh", "sh", "-c", PROG, 0);
+			execlp(SHELL_PATH, "sh", "-c", prog_path, (char *)NULL);
 			exit(1);
 
 		default:
@@ -129,7 +149,7 @@ do_forkexec(iter_t iterations, void* cookie)
 	signal(SIGCHLD, SIG_DFL);
 	handle_scheduler(benchmp_childid(), 0, 1);
 	while (iterations-- > 0) {
-		nav[0] = PROG;
+		nav[0] = prog_path;
 		nav[1] = 0;
 		switch (child_pid = fork()) {
 		case -1:
@@ -139,7 +159,7 @@ do_forkexec(iter_t iterations, void* cookie)
 		case 0: 	/* child */
 			handle_scheduler(benchmp_childid(), 1, 1);
 			close(1);
-			execve(PROG, nav, 0);
+			execve(prog_path, nav, 0);
 			exit(1);
 
 		default:
