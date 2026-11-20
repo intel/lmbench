@@ -1825,6 +1825,7 @@ cp(char* src, char* dst, mode_t mode)
 	fsync(dfd);
 	close(sfd);
 	close(dfd);
+	return 0;
 }
 
 #if defined(hpux) || defined(__hpux)

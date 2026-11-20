@@ -43,10 +43,14 @@ typedef unsigned char bool_t;
 #ifdef HAVE_SCHED_SETAFFINITY
 #include	<sched.h>
 #endif
+#ifndef __ANDROID__
 #define PORTMAP
 #include	<rpc/rpc.h>
 #endif
+#endif
+#ifndef __ANDROID__
 #include	<rpc/types.h>
+#endif
 
 #include 	<stdarg.h>
 #ifndef HAVE_uint
@@ -68,6 +72,26 @@ typedef int64_t int64;
 typedef long long int64;
 #endif /* HAVE_int64_t */
 #endif /* HAVE_int64 */
+
+#ifdef __ANDROID__
+#include	<malloc.h>
+#define	valloc(size)	memalign(getpagesize(), (size))
+#ifndef TRUE
+#define	TRUE	1
+#endif
+#ifndef FALSE
+#define	FALSE	0
+#endif
+#ifndef S_IREAD
+#define	S_IREAD	S_IRUSR
+#endif
+#ifndef S_IWRITE
+#define	S_IWRITE	S_IWUSR
+#endif
+#define	LMBENCH_TMPDIR	"/data/local/tmp"
+#else
+#define	LMBENCH_TMPDIR	"/tmp"
+#endif
 
 #define NO_PORTMAPPER
 
@@ -103,9 +127,9 @@ typedef long long int64;
 #define	VERS		(u_long)1
 #endif
 
-#define	UNIX_CONTROL	"/tmp/lmbench.ctl"
-#define	UNIX_DATA	"/tmp/lmbench.data"
-#define	UNIX_LAT	"/tmp/lmbench.lat"
+#define	UNIX_CONTROL	LMBENCH_TMPDIR "/lmbench.ctl"
+#define	UNIX_DATA	LMBENCH_TMPDIR "/lmbench.data"
+#define	UNIX_LAT	LMBENCH_TMPDIR "/lmbench.lat"
 
 /*
  * socket send/recv buffer optimizations
@@ -358,8 +382,10 @@ extern int handle_scheduler(int childno, int benchproc, int nbenchprocs);
 #define XACT_VERS ((u_long)1)
 #define RPC_XACT ((u_long)1)
 #define RPC_EXIT ((u_long)2)
+#ifndef __ANDROID__
 extern char *rpc_xact_1(char *msg, register SVCXPRT *transp);
 extern char *client_rpc_xact_1(char *argp, CLIENT *clnt);
+#endif
 
 void lmbench_usage(int argc, char *argv[], char* usage);
 

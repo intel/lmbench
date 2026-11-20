@@ -15,7 +15,7 @@
 char	*id = "$Id$\n";
 #include "bench.h"
 
-#define CONNAME "/tmp/af_unix"
+#define CONNAME LMBENCH_TMPDIR "/af_unix"
 
 void server_main(void);
 
@@ -80,6 +80,7 @@ int main(int ac, char **av)
 
 	benchmp(NULL, benchmark, NULL, 0, parallel, warmup, repetitions, NULL);
 	micro("UNIX connection cost", get_n());
+	return 0;
 }
 
 void server_main(void)

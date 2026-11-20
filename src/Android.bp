@@ -1,0 +1,97 @@
+// Android Soong build definitions for lmbench.
+// Note: lat_rpc (SunRPC) and lat_sem (SysV IPC) are omitted because Android's
+// Bionic libc does not provide <rpc/rpc.h> or <sys/sem.h>.
+
+cc_defaults {
+    name: "lmbench_defaults",
+    cflags: [
+        "-DHAVE_uint=1",
+        "-DHAVE_uint64_t=1",
+        "-DHAVE_int64_t=1",
+        "-DHAVE_DRAND48",
+        "-DHAVE_SCHED_SETAFFINITY=1",
+        "-DRUSAGE",
+        "-Wno-error",
+        "-Wno-format-security",
+    ],
+    static_libs: ["lmbench_lib"],
+}
+
+cc_library_static {
+    name: "lmbench_lib",
+    srcs: [
+        "getopt.c",
+        "lib_debug.c",
+        "lib_mem.c",
+        "lib_sched.c",
+        "lib_stats.c",
+        "lib_tcp.c",
+        "lib_timing.c",
+        "lib_udp.c",
+        "lib_unix.c",
+    ],
+    cflags: [
+        "-DHAVE_uint=1",
+        "-DHAVE_uint64_t=1",
+        "-DHAVE_int64_t=1",
+        "-DHAVE_DRAND48",
+        "-DHAVE_SCHED_SETAFFINITY=1",
+        "-DRUSAGE",
+        "-Wno-error",
+        "-Wno-format-security",
+    ],
+}
+
+cc_binary { name: "bw_file_rd", srcs: ["bw_file_rd.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "bw_mem", srcs: ["bw_mem.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "bw_mem64", srcs: ["bw_mem64.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "bw_mem64a", srcs: ["bw_mem64a.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "bw_mem64d", srcs: ["bw_mem64d.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "bw_mem64p", srcs: ["bw_mem64p.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "bw_mmap_rd", srcs: ["bw_mmap_rd.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "bw_pipe", srcs: ["bw_pipe.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "bw_tcp", srcs: ["bw_tcp.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "bw_unix", srcs: ["bw_unix.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "cache", srcs: ["cache.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "disk", srcs: ["disk.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "enough", srcs: ["enough.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "flushdisk", srcs: ["flushdisk.c"], cflags: ["-DMAIN", "-Wno-error"] }
+cc_binary { name: "hello", srcs: ["hello.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_cmd", srcs: ["lat_cmd.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_connect", srcs: ["lat_connect.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_ctx", srcs: ["lat_ctx.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_dram_page", srcs: ["lat_dram_page.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_fcntl", srcs: ["lat_fcntl.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_fifo", srcs: ["lat_fifo.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_fs", srcs: ["lat_fs.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_http", srcs: ["lat_http.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_mem_pingpong", srcs: ["lat_mem_pingpong.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_mem_rd", srcs: ["lat_mem_rd.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_mmap", srcs: ["lat_mmap.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_ops", srcs: ["lat_ops.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_pagefault", srcs: ["lat_pagefault.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_pipe", srcs: ["lat_pipe.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_pmake", srcs: ["lat_pmake.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_proc", srcs: ["lat_proc.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_rand", srcs: ["lat_rand.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_select", srcs: ["lat_select.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_sig", srcs: ["lat_sig.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_syscall", srcs: ["lat_syscall.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_tcp", srcs: ["lat_tcp.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_udp", srcs: ["lat_udp.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_unix", srcs: ["lat_unix.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_unix_connect", srcs: ["lat_unix_connect.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lat_usleep", srcs: ["lat_usleep.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "line", srcs: ["line.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lmdd", srcs: ["lmdd.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "lmhttp", srcs: ["lmhttp.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "loop_o", srcs: ["loop_o.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "memsize", srcs: ["memsize.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "mhz", srcs: ["mhz.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "msleep", srcs: ["msleep.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "par_mem", srcs: ["par_mem.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "par_ops", srcs: ["par_ops.c"], defaults: ["lmbench_defaults"] }
+// Named "lmstream" to avoid colliding with AOSP's stagefright "stream" module.
+cc_binary { name: "lmstream", srcs: ["stream.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "timing_o", srcs: ["timing_o.c"], defaults: ["lmbench_defaults"] }
+cc_binary { name: "tlb", srcs: ["tlb.c"], defaults: ["lmbench_defaults"] }

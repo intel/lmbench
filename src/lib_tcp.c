@@ -33,6 +33,11 @@ tcp_server(int prog, int rdwr)
 	if (prog < 0) {
 		s.sin_port = htons(-prog);
 	}
+#ifdef	NO_PORTMAPPER
+	else if (prog > 0) {
+		s.sin_port = htons(prog);
+	}
+#endif
 	if (bind(sock, (struct sockaddr*)&s, sizeof(s)) < 0) {
 		perror("bind");
 		exit(2);
@@ -41,6 +46,7 @@ tcp_server(int prog, int rdwr)
 		perror("listen");
 		exit(4);
 	}
+#ifndef	NO_PORTMAPPER
 	if (prog > 0) {
 #ifdef	LIBTCP_VERBOSE
 		fprintf(stderr, "Server port %d\n", sockport(sock));
@@ -52,6 +58,7 @@ tcp_server(int prog, int rdwr)
 			exit(5);
 		}
 	}
+#endif
 	return (sock);
 }
 
@@ -61,9 +68,11 @@ tcp_server(int prog, int rdwr)
 int
 tcp_done(int prog)
 {
+#ifndef	NO_PORTMAPPER
 	if (prog > 0) {
 		pmap_unset((u_long)prog, (u_long)1);
 	}
+#endif
 	return (0);
 }
 
@@ -159,6 +168,7 @@ tcp_connect(char *host, int prog, int rdwr)
 		bzero((void *) &s, sizeof(s));
 		s.sin_family = AF_INET;
 		bcopy((void*)h->h_addr, (void *)&s.sin_addr, h->h_length);
+#ifndef	NO_PORTMAPPER
 		if (prog > 0) {
 			save_port = pmap_getport(&s, prog,
 			    (u_long)1, IPPROTO_TCP);
@@ -170,8 +180,10 @@ tcp_connect(char *host, int prog, int rdwr)
 			fprintf(stderr, "Server port %d\n", save_port);
 #endif
 			s.sin_port = htons(save_port);
-		} else {
-			s.sin_port = htons(-prog);
+		} else
+#endif
+		{
+			s.sin_port = htons(prog < 0 ? -prog : prog);
 		}
 	}
 	if (connect(sock, (struct sockaddr*)&s, sizeof(s)) < 0) {

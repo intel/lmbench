@@ -12,8 +12,8 @@ char	*id = "$Id$\n";
 
 #include "bench.h"
 
-#define	F1	"/tmp/lmbench_f1.%d"
-#define	F2	"/tmp/lmbench_f2.%d"
+#define	F1	LMBENCH_TMPDIR "/lmbench_f1.%d"
+#define	F2	LMBENCH_TMPDIR "/lmbench_f2.%d"
 
 void initialize(iter_t iterations, void *cookie);
 void cleanup(iter_t iterations, void *cookie);
