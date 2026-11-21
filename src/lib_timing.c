@@ -325,6 +325,14 @@ cleanup_exit:
 		signal(SIGALRM, benchmp_sigalrm_handler);
 	}
 
+	/*
+	 * Put back the SIGTERM handler we found.  Otherwise the next
+	 * benchmp() call (e.g. the measurement run after calibration)
+	 * takes benchmp_sigterm for a caller's handler, the children
+	 * install it, and they no longer exit on SIGTERM.
+	 */
+	signal(SIGTERM, benchmp_sigterm_handler);
+
 	if (pids) free(pids);
 #ifdef _DEBUG
 	fprintf(stderr, "benchmp(0x%x, 0x%x, 0x%x, %d, %d, 0x%x): exiting\n", (unsigned int)initialize, (unsigned int)benchmark, (unsigned int)cleanup, enough, parallel, (unsigned int)cookie);
@@ -613,7 +621,7 @@ benchmp_child_sigchld(int signo)
 #endif
 	if (_benchmp_child_state.cleanup) {
 		signal(SIGCHLD, SIG_DFL);
-		(*_benchmp_child_state.cleanup)(0, &_benchmp_child_state);
+		(*_benchmp_child_state.cleanup)(0, _benchmp_child_state.cookie);
 	}
 	exit(1);
 }
@@ -627,7 +635,7 @@ benchmp_child_sigterm(int signo)
 		if (sig != benchmp_child_sigchld && sig != SIG_DFL) {
 			signal(SIGCHLD, sig);
 		}
-		(*_benchmp_child_state.cleanup)(0, &_benchmp_child_state);
+		(*_benchmp_child_state.cleanup)(0, _benchmp_child_state.cookie);
 	}
 	exit(0);
 }
@@ -818,6 +826,8 @@ benchmp_interval(void* _state)
 				if (benchmp_sigchld_handler == SIG_DFL)
 					signal(SIGCHLD, SIG_DFL);
 				(*state->cleanup)(0, state->cookie);
+				/* a SIGTERM from here on must not clean up again */
+				state->cleanup = NULL;
 			}
 
 			/* Now wait for signal to exit */
